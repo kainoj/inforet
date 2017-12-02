@@ -1,0 +1,159 @@
+_This doc is a proper markdown file_
+
+# Experiences
+It was a nice and quite easy exercises. It took me about 4 hours in total.
+
+# Ex. 1 + 2
+#### What non-trivial ideas have I used?
+ - galloping search
+ - binary search
+ - sentinels
+
+#### Implementation step by step:
+_Results of the following steps are listed at the end of this flie_
+1. First, I implemented galloping search with
+   separate function `PostingList::bin_search`
+2. Then, I literally pasted content of `bin_search` into body of `intersect`.
+   I was aware, that function call stack may affect performance, but not in
+   a such way! (look at `2nd attempt`)
+3. [_Not related, but interesting_] At this point I run the same program, but
+   with youtube video in 4K resolution in background. Processor and mem usage
+   were >= 80% and the results were surprising. I repeated the experiment
+   several times and results were the same - performance has increased, look
+   at `2nd attempt + yt`.
+4. Finally I replaced `for (size_t i = 0; i < A.size(); i++)` loop with
+   `while (true)` and a if condition. Result were satisfying. `3rd attempt` is
+   the result of the submitted code.
+
+#### What have I done...
+..but does not improved performance.
+1. I have tried to get rid of ifs in binary search. I have substituted ifs with
+   ternary operator:
+   ```cpp
+   bool cond = B.getId(s) < A.getId(i);
+   a = cond ? s+1 : a;
+   b = cond ? b   : s;
+   ```
+2. I tried caching frequently used values, eg. I wrote `size_t val = A.getId(i)`
+   and substituted every occurrence of `A.getId(i)` with just `val`.
+
+Both solutions have not changed anything in performance. I think the reason
+is `-O3` optimization.
+
+
+### 1st attempt
+Galloping search and binary search in separate fun
+
+```bash
+./IntersectMain /tmp/postinglists/rug.txt /tmp/postinglists/film.txt /tmp/postinglists/bowling.txt
+Reading list '/tmp/postinglists/rug.txt'	...	Done. Size: 5132.
+Reading list '/tmp/postinglists/film.txt'	...	Done. Size: 1983510.
+Reading list '/tmp/postinglists/bowling.txt'	...	Done. Size: 131068.
+
+
+> Intersect '/tmp/postinglists/film.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 1293µs. 	|	size: 450
+[My algo ]	 Time: 613µs. 	|	size: 450
+Ratio:    	    2.11
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 95µs. 	|	size: 23
+[My algo ]	 Time: 263µs. 	|	size: 23
+Ratio:    	    0.36
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/film.txt'.
+[Baseline]	 Time: 1941µs. 	|	size: 3412
+[My algo ]	 Time: 10627µs. 	|	size: 3412
+Ratio:    	    0.18
+
+```
+
+
+
+### 2nd attempt
+Gallop and bin search in same fun
+
+```bash
+./IntersectMain /tmp/postinglists/rug.txt /tmp/postinglists/film.txt /tmp/postinglists/bowling.txt
+Reading list '/tmp/postinglists/rug.txt'	...	Done. Size: 5132.
+Reading list '/tmp/postinglists/film.txt'	...	Done. Size: 1983510.
+Reading list '/tmp/postinglists/bowling.txt'	...	Done. Size: 131068.
+
+
+> Intersect '/tmp/postinglists/film.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 1904µs. 	|	size: 450
+[My algo ]	 Time: 391µs. 	|	size: 450
+Ratio:    	    4.87
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 92µs. 	|	size: 23
+[My algo ]	 Time: 57µs. 	|	size: 23
+Ratio:    	    1.61
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/film.txt'.
+[Baseline]	 Time: 2616µs. 	|	size: 3412
+[My algo ]	 Time: 2571µs. 	|	size: 3412
+Ratio:    	    1.02
+```
+
+
+
+### 2nd attempt + yt
+Iceland in 4K Ultra HD https://www.youtube.com/watch?v=2h7Dy7O2brs
+
+```bash
+./IntersectMain /tmp/postinglists/rug.txt /tmp/postinglists/film.txt /tmp/postinglists/bowling.txt
+Reading list '/tmp/postinglists/rug.txt'	...	Done. Size: 5132.
+Reading list '/tmp/postinglists/film.txt'	...	Done. Size: 1983510.
+Reading list '/tmp/postinglists/bowling.txt'	...	Done. Size: 131068.
+
+
+> Intersect '/tmp/postinglists/film.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 3283µs. 	|	size: 450
+[My algo ]	 Time: 645µs. 	|	size: 450
+Ratio:    	    5.09
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 144µs. 	|	size: 23
+[My algo ]	 Time: 71µs. 	|	size: 23
+Ratio:    	    2.03
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/film.txt'.
+[Baseline]	 Time: 4924µs. 	|	size: 3412
+[My algo ]	 Time: 4143µs. 	|	size: 3412
+Ratio:    	    1.19
+```
+
+### 3rd attempt
+Both galloping, binary search and sentinels.
+
+```bash
+./IntersectMain /tmp/postinglists/rug.txt /tmp/postinglists/film.txt /tmp/postinglists/bowling.txt
+Reading list '/tmp/postinglists/rug.txt'	...	Done. Size: 5133.
+Reading list '/tmp/postinglists/film.txt'	...	Done. Size: 1983511.
+Reading list '/tmp/postinglists/bowling.txt'	...	Done. Size: 131069.
+
+
+> Intersect '/tmp/postinglists/film.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 1903µs. 	|	size: 451
+[My algo ]	 Time: 436µs. 	|	size: 450
+Ratio:    	    4.36
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/rug.txt'.
+[Baseline]	 Time: 101µs. 	|	size: 24
+[My algo ]	 Time: 57µs. 	|	size: 23
+Ratio:    	    1.76
+
+
+> Intersect '/tmp/postinglists/bowling.txt' & '/tmp/postinglists/film.txt'.
+[Baseline]	 Time: 2784µs. 	|	size: 3413
+[My algo ]	 Time: 2082µs. 	|	size: 3412
+Ratio:    	    1.34
+```
