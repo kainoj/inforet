@@ -16,7 +16,7 @@
 
 class HttpHeader {
  public:
-  explicit HttpHeader(std::string requestHeader);
+  HttpHeader(std::string requestHeader, QGramIndex &Index);
 
   // Finds string `key` in `str` and returns the next word
   // (whitspace separated, multile whitespaces are ignored)
@@ -36,6 +36,7 @@ class HttpHeader {
  private:
   // Request header
   std::string header;
+  QGramIndex &Index;
   std::string fileName;
   std::string method;
   std::string host;

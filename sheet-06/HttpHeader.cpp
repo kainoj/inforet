@@ -4,7 +4,9 @@
 #include "./HttpHeader.h"
 
 // _____________________________________________________________________________
-HttpHeader::HttpHeader(std::string requestHeader) : header(requestHeader) {
+HttpHeader::HttpHeader(std::string requestHeader, QGramIndex &Index)
+  : header(requestHeader),
+    Index(Index) {
   parseHttpHeader();
   parseParams();
   parseContentType();

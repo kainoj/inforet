@@ -29,6 +29,14 @@ class Entity {
     return description;
   }
 
+  // Get description without url
+  string getTruncDesc() const {
+    size_t pos = description.find("http");
+    if (pos != string::npos)
+      return description.substr(0, pos-1);
+    return description;
+  }
+
   friend std::ostream& operator<< (std::ostream& stream, const Entity& e) {
     stream << "name: " << e.getName() << ", ";
     stream << "score: " << e.getScore() << ", ";

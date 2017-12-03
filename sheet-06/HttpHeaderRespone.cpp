@@ -59,7 +59,7 @@ std::string HttpHeader::processQuerry(std::string content) {
 
   if (params.find("q") == params.end()) {
     content.replace(queryVarPos, 7, "");
-    content.replace(resulVarPos, 8, "");
+    content.replace(resulVarPos-7, 8, "");
     return content;
   }
 
@@ -72,13 +72,13 @@ std::string HttpHeader::processQuerry(std::string content) {
   auto matches = Index.findAndRankMatches(query, query.length()/4);
 
   std::string res = "";
-
-  for (size_t i = 0; i < matches.size(); i++) {
-    res += matches[i].first.getName() + "<br/>";
-    res += matches[i].first.getScore() + "<br/>";
-    res += matches[i].first.getDesc() + "<br/><hr/>";
+  size_t bound = (matches.size() < 5) ? matches.size() : 5;
+  for (size_t i = 0; i < bound; i++) {
+    res += matches[i].first.getName()  + "<br/>";
+    res += std::to_string(matches[i].first.getScore()) + "<br/>";
+    res += matches[i].first.getTruncDesc()  + " <br/><hr/> ";
   }
 
-  content.replace(resulVarPos - 7 + query.length(), 8, res);
+  content.replace(content.find("%RESULT%"), 8, res);
   return content;
 }
