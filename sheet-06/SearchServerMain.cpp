@@ -9,8 +9,12 @@
 #include <string>
 #include <chrono>
 
-#include "./QGramIndex.h"
+//#include "./QGramIndex.h"
 #include "./Server.h"
+#include "./HttpHeader.h"
+
+// Injecting a pointer to different classes would cause me a Kopfschmertz.
+QGramIndex Index(3);
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -23,11 +27,14 @@ int main(int argc, char** argv) {
   uint16_t port = atoi(argv[2]);
   std::string query;
 
+
   std::cout << "Building index from '" << fileName << "' ... ";
   std::cout << std::flush;
 
-  QGramIndex index(3);
-  index.buildFromFile(fileName);
+
+
+
+  Index.buildFromFile(fileName);
   std::cout << "done!" << "\n\n";
 
   std::cout << "Running server on port: " << port <<  " ... \n";

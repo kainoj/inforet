@@ -10,6 +10,9 @@
 #include <sstream>
 #include <unordered_map>
 #include <sys/stat.h>
+#include <algorithm>
+
+#include "./QGramIndex.h"
 
 class HttpHeader {
  public:
@@ -53,6 +56,8 @@ class HttpHeader {
   void composeResponse200();
   void composeResponse300();
   void composeResponse400();  // >400
+
+  std::string processQuerry(std::string content);
 
 
   bool fileExists(const std::string& name);

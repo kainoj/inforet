@@ -28,13 +28,6 @@ void Server::receive() {
     HttpHeader header(hdrstr);
     header.printBriefInfo();
 
-    std::stringstream contentStream;
-    std::ifstream file(header.getFileName());
-    if (file) {
-      std::cout << "otwerraam" << '\n';
-      contentStream << file.rdbuf();
-      file.close();
-    }
     boost::asio::write(client, boost::asio::buffer(header.getResponse()),
       boost::asio::transfer_all());
 
