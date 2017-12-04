@@ -20,6 +20,7 @@ void HttpHeader::composeResponse() {
 
 // _____________________________________________________________________________
 void HttpHeader::composeResponse400() {
+  contentType = contentTypes.at("html");
   std::string body = "Error: " + statusCodes.at(status);
   response += "Content-Type: " + contentType + "\r\n";
   response += "Content-Length: ";
@@ -83,8 +84,6 @@ std::string HttpHeader::processQuerry(std::string content) {
     res += "<td/>";
     res += "<td class=\"desc\">" + matches[i].first.getTruncDesc()  + "<td/>";
     res += "</tr>";
-    std::cout << "url: " <<  matches[i].first.getUrl() <<'\n';
-    std::cout << "##" << matches[i].first.getDesc() << '\n';
   }
   res += "</table>";
 

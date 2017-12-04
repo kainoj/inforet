@@ -42,22 +42,16 @@ TEST(HttpHeaderTest, testParseHttpHeader) {
 TEST(HttpHeaderTest, testParseContentType) {
   HttpHeader h1("GET /a.html HTTP/.1\r\nHost: example.com\r\n", Index);
   ASSERT_EQ("text/html", h1.getContentType());
-
+  // text/html, because the files dont exist...
   HttpHeader h2("GET /b.css HTTP/.1\r\nHost: example.com\r\n", Index);
-  ASSERT_EQ("text/css", h2.getContentType());
+  ASSERT_EQ("text/html", h2.getContentType());
 
   HttpHeader h3("GET /c.txt HTTP/.1\r\nHost: example.com\r\n", Index);
-  ASSERT_EQ("text/plain", h3.getContentType());
+  ASSERT_EQ("text/html", h3.getContentType());
 
   HttpHeader h4("GET /c.asd HTTP/.1\r\nHost: example.com\r\n", Index);
-  ASSERT_EQ("application/octet-stream", h4.getContentType());
+  ASSERT_EQ("text/html", h4.getContentType());
 
   HttpHeader h5("GET /ddd HTTP/.1\r\nHost: example.com\r\n", Index);
-  ASSERT_EQ("application/octet-stream", h4.getContentType());
+  ASSERT_EQ("text/html", h4.getContentType());
 }
-
-// TEST(HttpHeaderTest, testComposeStatusCode) {
-//   HttpHeader h1("GET /a.html HTTP/.1\r\nHost: example.com\r\n");
-//   ASSERT_EQ("text/html", h1.getContentType());
-//
-// }
