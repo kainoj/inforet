@@ -25,19 +25,32 @@ void QGramIndex::buildFromFile(const std::string& fileName) {
   std::getline(in, line);
   // Iterate through the remaining lines.
   while (std::getline(in, line)) {
-    size_t posTab1 = line.find('\t');
-    std::string word = line.substr(0, posTab1 + 1);
+    // size_t posTab1 = line.find('\t');
+    // std::string word = line.substr(0, posTab1 + 1);
+    //
+    // size_t posTab2 = line.find('\t', posTab1+1);
+    // size_t score = std::stoi(line.substr(posTab1+1, posTab2));
+    // std::string desc = line.substr(posTab2+1, line.length());
+    std::vector<std::string> parts = split(line, '\t');
 
-    size_t posTab2 = line.find('\t', posTab1+1);
-    size_t score = std::stoi(line.substr(posTab1+1, posTab2));
-    std::string desc = line.substr(posTab2+1, line.length());
+    std::string name;
+    if (parts.size() > 0) { name = parts[0]; }
 
-    entities.push_back(Entity{word.substr(0, word.length()-1), score, desc});
+    size_t score = 0;
+    if (parts.size() > 1) { score = atoi(parts[1].c_str()); }
+
+    std::string description;
+    if (parts.size() > 2) { description = parts[2]; }
+
+    std::string wikipediaUrl;
+    if (parts.size() > 3) { wikipediaUrl = parts[3]; }
+
+    entities.push_back(Entity{name, score, description, wikipediaUrl});
 
     wordId++;
 
     // Compute the q-grams of the (normalized) entity name.
-    for (const std::string& qGram : computeQGrams(word)) {
+    for (const std::string& qGram : computeQGrams(name)) {
       _invertedLists[qGram].push_back(wordId);
     }
   }
@@ -165,4 +178,18 @@ vector<pair<Entity, size_t>>
             QGramIndex::findAndRankMatches(string x, size_t delta) {
   auto matches = findMatches(x,  delta);
   return rankMatches(matches.first);
+}
+
+// _____________________________________________________________________________
+std::vector<std::string> QGramIndex::split(const std::string& text, char sep) {
+  std::vector<std::string> tokens;
+  std::size_t start = 0, end = 0;
+  while ((end = text.find(sep, start)) != std::string::npos) {
+    tokens.push_back(text.substr(start, end - start));
+    start = end + 1;
+  }
+  if (start < end) {
+    tokens.push_back(text.substr(start));
+  }
+  return tokens;
 }

@@ -1,0 +1,40 @@
+body {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 20px;
+}
+
+#query_input {
+  padding: 10px;
+  font-size: 30px;
+}
+
+#search_form {
+  margin: 50px;
+}
+
+.result {
+  text-align: right;
+  font-size: 110%;
+}
+
+.score {
+  color: darkgray;
+  font-style: italic;
+}
+
+#go_button {
+  font-size: 30px;
+}
+
+td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+
+tr:hover {
+  background-color: palegreen;
+}
+
+#res {
+  margin-left: 50px;
+}

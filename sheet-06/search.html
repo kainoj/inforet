@@ -5,15 +5,20 @@
   <meta charset="utf-8">
   <title>Search</title>
   <meta name="author" content="Prz Jon">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
+  <div id="search_form">
   <form>
-    <input type="text" placeholder="search..."  value="%QUERY%" name="q"/>
-    <input type="submit" value="Search!"/>
+    <input type="text" placeholder="search..."  value="%QUERY%" name="q" id="query_input"/>
+    <input type="submit" value="Go!" id="go_button"/>
   </form>
-  >%RESULT%<
-</body>
-</html>
+  </div>
+
+  <div id="res">
+    %RESULT%
+
+   </div>
+ </body>
+ </html>

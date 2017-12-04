@@ -41,6 +41,8 @@ class QGramIndex {
   // return it if it is smaller or equal to the given δ. Otherwise return δ + 1
   size_t prefixEditDistance(std::string a, std::string b, size_t delta);
 
+  vector<string> split(const std::string& text, char sep);
+
   // Find all entities y with PED(x, y) ≤ δ for the given
   // string x and a given integer δ.
   pair<vector<pair<Entity, size_t>>, size_t>

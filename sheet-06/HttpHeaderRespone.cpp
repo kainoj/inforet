@@ -71,13 +71,22 @@ std::string HttpHeader::processQuerry(std::string content) {
 
   auto matches = Index.findAndRankMatches(query, query.length()/4);
 
-  std::string res = "";
+  std::string res = "<table>";
   size_t bound = (matches.size() < 5) ? matches.size() : 5;
   for (size_t i = 0; i < bound; i++) {
-    res += matches[i].first.getName()  + "<br/>";
-    res += std::to_string(matches[i].first.getScore()) + "<br/>";
-    res += matches[i].first.getTruncDesc()  + " <br/><hr/> ";
+    res += "<tr>";
+    res += "<td class=\"result\">";
+    res += "<a href=\"" + matches[i].first.getUrl() + "\">";
+    res += matches[i].first.getName();
+    res += "</a><td/>";
+    res += "<td class=\"score\">" + std::to_string(matches[i].first.getScore());
+    res += "<td/>";
+    res += "<td class=\"desc\">" + matches[i].first.getTruncDesc()  + "<td/>";
+    res += "</tr>";
+    std::cout << "url: " <<  matches[i].first.getUrl() <<'\n';
+    std::cout << "##" << matches[i].first.getDesc() << '\n';
   }
+  res += "</table>";
 
   content.replace(content.find("%RESULT%"), 8, res);
   return content;

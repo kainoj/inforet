@@ -17,6 +17,12 @@ class Entity {
       score(score),
       description(description) {}
 
+  explicit Entity(string name, size_t score, string description, string wiki)
+    : name(name),
+      score(score),
+      description(description),
+      wikiUrl(wiki) {}
+
   string getName() const {
     return name;
   }
@@ -27,6 +33,10 @@ class Entity {
 
   string getDesc() const {
     return description;
+  }
+
+  string getUrl() const {
+    return wikiUrl;
   }
 
   // Get description without url
@@ -54,6 +64,7 @@ class Entity {
   string name;
   size_t score;
   string description;
+  string wikiUrl;
 };
 
 #endif  // ENTITY_H_
