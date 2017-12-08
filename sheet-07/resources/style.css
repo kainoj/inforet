@@ -3,7 +3,7 @@ body {
   font-size: 20px;
 }
 
-#query_input {
+#input {
   padding: 10px;
   font-size: 30px;
 }
@@ -22,10 +22,6 @@ body {
   font-style: italic;
 }
 
-#go_button {
-  font-size: 30px;
-}
-
 td {
   border-bottom: 1px solid #ddd;
   padding: 10px;
@@ -35,6 +31,6 @@ tr:hover {
   background-color: palegreen;
 }
 
-#res {
+#results {
   margin-left: 50px;
 }
