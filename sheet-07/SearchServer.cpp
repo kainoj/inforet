@@ -19,7 +19,8 @@ void SearchServer::run() {
   // The main server loop.
   while (true) {
     // Wait for the client.
-    std::cout << "Waiting on port " << _server.port() << " ... " << std::flush;
+    std::cout << "\n\nWaiting on port " << _server.port()
+        << " ... " << std::flush;
     _acceptor.accept(_client);
     std::cout << "client connected from "
         << _client.remote_endpoint().address().to_string() << std::endl;
@@ -146,7 +147,7 @@ std::stringstream SearchServer::createResponse(const std::string& requestLine)
   }
 
   std::ifstream fstream((SERVE_DIR + fileName).c_str(), std::ios_base::in);
-  if (!fstream) {
+  if (!fstream && fileName.compare(API_URL) != 0) {
     // The requested file does not exist or is not readable.
     std::cout << "RESPONSE: 404 (File does not exist)." << std::endl;
         response << HTTP_ERROR_RESPONSES.find(404)->second;
@@ -157,9 +158,9 @@ std::stringstream SearchServer::createResponse(const std::string& requestLine)
   std::stringstream ss;
   ss << fstream.rdbuf();
 
-  if (fileName.compare("search.html") == 0) {
+  if (fileName.compare(API_URL) == 0) {
     // Handle a fuzzy prefix search request.
-    std::cout << "Handling fuzzy prefix search request." << std::endl;
+    std::cout << "API call" << std::endl;
     ss = handleFuzzyPrefixSearchRequest(parameters, ss);
   }
 
@@ -188,40 +189,18 @@ std::stringstream SearchServer::handleFuzzyPrefixSearchRequest(
   // Decode all url-encoded whitespaces.
   std::replace(query.begin(), query.end(), '+', ' ');
 
-  size_t numResultsTotal = 0;
+  // size_t numResultsTotal = 0;
   size_t numResultsToShow = 0;
 
-  std::string searchHtml = stream.str();
-
-  // Pass the query to the q-gram index and create the related HTML fragment.
-  std::stringstream resultHtml;
+  // Pass the query to the q-gram index and create JSON.
+  std::stringstream resultJSON;
   if (query.length() != 0) {
     std::pair<std::vector<Entity>, size_t> result = _index.findMatches(query);
     std::vector<Entity> matches = result.first;
-    numResultsTotal = matches.size();
     numResultsToShow = std::min(matches.size(), NUM_SEARCH_RESULTS_TO_SHOW);
-    for (size_t i = 0; i < numResultsToShow; ++i) {
-      resultHtml << translateToHtml(matches[i]) << DEFAULT_LINE_DELIMITER;
-    }
+    resultJSON << translateToJSON(matches, numResultsToShow);
   }
-
-  // Plug in the query into the search.html.
-  replaceAll(searchHtml, "%QUERY%", query);
-
-  // Plug in the result header.
-  std::stringstream resultHeader;
-  if (numResultsToShow == 0) {
-    resultHeader << "Nothing to show.";
-  } else {
-    resultHeader << "Found " << numResultsTotal << " results for query '"
-        << query << "'.";
-  }
-  replaceAll(searchHtml, "%RESULT_HEADER%", resultHeader.str());
-
-  // Plug in the HTML fragment containing the search results.
-  replaceAll(searchHtml, "%RESULT%", resultHtml.str());
-
-  return std::stringstream(searchHtml);
+  return resultJSON;
 }
 
 // _____________________________________________________________________________
@@ -297,3 +276,21 @@ void SearchServer::replaceAll(std::string& str, const std::string& from,
   }
 }
 
+// _____________________________________________________________________________
+std::string SearchServer::translateToJSON(const std::vector<Entity>& entities,
+    size_t numResultsToShow) const {
+  std::string json;
+  json += "{\"found\":" + std::to_string(entities.size()) + ",";
+  json += "\"res\":[";
+  for (size_t i = 0; i < numResultsToShow; i++) {
+    json += "{";
+    json += "\"name\":\"" + entities[i].name + "\",";
+    json += "\"description\":\"" + entities[i].description + "\"";
+    // TODO(przemek): imlement all entities values
+    json += "}";
+    if (i != numResultsToShow - 1)
+      json += ",";
+  }
+  json += "]}";
+  return json;
+}

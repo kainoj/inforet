@@ -11,7 +11,7 @@
 #include "./QGramIndex.h"
 
 // The base directory of the files to serve.
-const char SERVE_DIR[] = "../resources/";
+const char SERVE_DIR[] = "./resources/";
 
 // The default HTTP response header.
 const char HTTP_OK_HEADER[] = "HTTP/1.1 200 OK";
@@ -28,7 +28,8 @@ const std::map<std::string, std::string> CONTENT_TYPES = {
   { ".css", "text/css" },
   { ".js", "application/javascript" },
   { ".jpg", "image/jpeg" },
-  { ".png", "image/png" }
+  { ".png", "image/png" },
+  { "api", "application/json"}
 };
 
 // The available HTTP error responses by status codes.
@@ -66,6 +67,8 @@ const char ENTITY_TEMPLATE_FILE[] = "entity.pattern.html";
 // The number of search results to show per default.
 const size_t NUM_SEARCH_RESULTS_TO_SHOW = 5;
 
+// URL, where API is reachable
+const char API_URL[] = "api";
 
 // A simple server that handles fuzzy prefix search requests and file requests.
 class SearchServer {
@@ -105,6 +108,11 @@ class SearchServer {
 
   // Translates the given entity to HTML.
   std::string translateToHtml(const Entity& entity) const;
+
+  // Translates the given entity to JSON.
+  std::string translateToJSON(const std::vector<Entity>& entities,
+      size_t numResultsToShow) const;
+
 
   // Returns the content type of the given file.
   std::string getContentType(const std::string& fileName) const;
