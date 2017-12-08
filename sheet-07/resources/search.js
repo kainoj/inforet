@@ -11,29 +11,50 @@ $(document).ready(function() {
 
     $.getJSON(url, function(response) {
       console.log("Got response for query: " + query);
-
-      var html = "";
-      for (var i = 0; i < response.res.length; i++) {
-        html += "<b>" + response.res[i].name + "</b> - ";
-        html += "<i>" + response.res[i].description + "</i>";
-        html += "</br>"
-      }
-
-      $("#results").html(html);
+      $("#results").html(jsonToHtml(response.res));
       $("#number").html("Found: " + response.found);
     })
   })
 
+  coolCoookiesUsage();
 });
 
 
-// // Translates JSON to HTML
-// function jsonToHtml(json) {
-//   var html = "";
-//
-//
-//     html += "<h4>" + e.res.name + "</h4>";
-//     html += "<i>" + e.res.description + "</i>";
-//     html += "</br>"
-//   }
-// }
+// Translates JSON to HTML
+function jsonToHtml(entities) {
+  var html = "";
+  for (var e in entities) {
+    html += "<b>" + esc(entities[e].name) + "</b> - ";
+    html +=  esc(entities[e].description);
+    html += "</br>"
+  }
+  return html
+}
+
+// Escapes special HTML characters
+function esc(html) {
+  return html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Cool cookies usage
+function coolCoookiesUsage() {
+  var lastVisitDate = Cookies.get("lastVisitDate");
+  var counter = Cookies.get('counter');
+
+  if (lastVisitDate) {
+    $("#visit").html("Your last visit on this page was on " + lastVisitDate);
+    Cookies.set('lastVisitDate', new Date());
+  }
+  else {
+    Cookies.set('lastVisitDate', new Date());
+  }
+
+  if (counter) {
+    $("#counter").html("You visited this site " + counter + " times.");
+    Cookies.set('counter', parseInt(counter)+1);
+    console.log("sad");
+  }
+  else {
+    Cookies.set('counter', 0);
+  }
+}

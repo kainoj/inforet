@@ -284,13 +284,22 @@ std::string SearchServer::translateToJSON(const std::vector<Entity>& entities,
   json += "\"res\":[";
   for (size_t i = 0; i < numResultsToShow; i++) {
     json += "{";
-    json += "\"name\":\"" + entities[i].name + "\",";
-    json += "\"description\":\"" + entities[i].description + "\"";
-    // TODO(przemek): imlement all entities values
+    json += "\"name\":\"" +         entities[i].name +        "\",";
+    json += "\"description\":\"" +  entities[i].description  +"\",";
+    json += "\"wikipediaUrl\":\"" + entities[i].wikipediaUrl + "\",";
+    json += "\"wikipediaId\":\"" +  entities[i].wikidataId +  "\",";
+    json += "\"imageUrl\":\"" +     entities[i].imageUrl + "\"";
     json += "}";
+
     if (i != numResultsToShow - 1)
       json += ",";
   }
   json += "]}";
+  // Prevent from JS injection
+  // I don't know why, but those chars are not beeing rendered...
+  // I used JS' replace instead
+  // replaceAll(json, "<", "&lt;");
+  // replaceAll(json, ">", "&gt;");
+  // replaceAll(json, "&", "&amp;");
   return json;
 }
