@@ -19,7 +19,7 @@ $(document).ready(function() {
       else {
         console.log("EMPTY");
         // That means that input field is already empty -> nothing to show
-        $("#results").html("");
+        $("#result").html("");
         $("#number").html("");
         $("#qry").html("");
       }
@@ -34,10 +34,15 @@ $(document).ready(function() {
 function jsonToHtml(entities) {
   var html = "";
   for (var e in entities) {
-    html += "<b> <a href=\"" + esc(entities[e].wikipediaUrl) + "\">";
-    html += esc(entities[e].name) + "</a></b> - ";
+    html += "<div class=\"entity\">";
+    // Result + URL
+    html += "<div class=\"result\">";
+    html += "<a href=\"" + esc(entities[e].wikipediaUrl) + "\">";
+    html += esc(entities[e].name) + "</a></div>";
+    // Description
+    html += "<div class=\"description\">";
     html += esc(entities[e].description);
-    html += "</br>"
+    html += "</div></div>"
   }
   return html
 }
