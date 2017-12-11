@@ -187,7 +187,8 @@ std::stringstream SearchServer::handleFuzzyPrefixSearchRequest(
   }
 
   // TODO(i): spaces + special chars
-
+  query = urlDecode(query);
+  std::cout << "query = " << query << "\n";
 
   // size_t numResultsTotal = 0;
   size_t numResultsToShow = 0;
@@ -195,7 +196,7 @@ std::stringstream SearchServer::handleFuzzyPrefixSearchRequest(
   // Pass the query to the q-gram index and create JSON.
   std::stringstream resultJSON;
   if (query.length() != 0) {
-    std::pair<std::vector<Entity>, size_t> result = _index.findMatches(query);
+    auto result = _index.findMatches(query);
     std::vector<Entity> matches = result.first;
     numResultsToShow = std::min(matches.size(), NUM_SEARCH_RESULTS_TO_SHOW);
     resultJSON << translateToJSON(matches, numResultsToShow);
@@ -305,8 +306,9 @@ std::string SearchServer::translateToJSON(const std::vector<Entity>& entities,
 }
 
 // _____________________________________________________________________________
-std::wstring SearchServer::urlDecode(std::string encoded) {
+std::string SearchServer::urlDecode(std::string encoded2) const {
   // Decode all url-encoded whitespaces.
+  auto encoded = encoded2;
   std::replace(encoded.begin(), encoded.end(), '+', ' ');
 
   // Decode special chars
@@ -325,9 +327,9 @@ std::wstring SearchServer::urlDecode(std::string encoded) {
       res += encoded[i];
     }
   }
-
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  std::wstring wstring = conv.from_bytes(res);
-
-  return wstring;
+  // See experiences.txt
+  // std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+  // std::wstring wstring = conv.from_bytes(res);
+  //  return wstring;
+  return res;
 }

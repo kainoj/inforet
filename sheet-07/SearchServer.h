@@ -94,7 +94,7 @@ class SearchServer {
   void run();
 
   // Decode an URL-encoded UTF-8 string
-  std::wstring urlDecode(std::string encoded);
+  std::string urlDecode(std::string encoded) const;
 
  private:
   // Handles a timeout of the client.
