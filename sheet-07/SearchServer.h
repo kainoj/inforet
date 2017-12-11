@@ -8,6 +8,8 @@
 
 #include <boost/asio.hpp>
 #include <regex>
+#include <locale>
+#include <codecvt>
 #include "./QGramIndex.h"
 
 // The base directory of the files to serve.
@@ -81,14 +83,18 @@ class SearchServer {
         _client(_ioService),
         _timer(_ioService) {
     // Read the HTML template for the entities of the q-gram index.
-    std::ifstream ifstream(SERVE_DIR + std::string(ENTITY_TEMPLATE_FILE));
-    std::stringstream buffer;
-    buffer << ifstream.rdbuf();
-    _entityHtmlPattern = buffer.str();
+    // This is no longer necessary since we serve json
+    // std::ifstream ifstream(SERVE_DIR + std::string(ENTITY_TEMPLATE_FILE));
+    // std::stringstream buffer;
+    // buffer << ifstream.rdbuf();
+    // _entityHtmlPattern = buffer.str();
   }
 
   // Starts the server loop.
   void run();
+
+  // Decode an URL-encoded UTF-8 string
+  std::wstring urlDecode(std::string encoded);
 
  private:
   // Handles a timeout of the client.

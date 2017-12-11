@@ -186,8 +186,8 @@ std::stringstream SearchServer::handleFuzzyPrefixSearchRequest(
     query = params.substr(pos + 3);
   }
 
-  // Decode all url-encoded whitespaces.
-  std::replace(query.begin(), query.end(), '+', ' ');
+  // TODO(i): spaces + special chars
+
 
   // size_t numResultsTotal = 0;
   size_t numResultsToShow = 0;
@@ -302,4 +302,32 @@ std::string SearchServer::translateToJSON(const std::vector<Entity>& entities,
   // replaceAll(json, ">", "&gt;");
   // replaceAll(json, "&", "&amp;");
   return json;
+}
+
+// _____________________________________________________________________________
+std::wstring SearchServer::urlDecode(std::string encoded) {
+  // Decode all url-encoded whitespaces.
+  std::replace(encoded.begin(), encoded.end(), '+', ' ');
+
+  // Decode special chars
+  // Mit kleine hilfe von Stackoverflow
+  std::string res = "";
+  int bytes;
+  char ch;
+
+  for (size_t i = 0; i < encoded.length(); i++) {
+    if (encoded[i] == '%') {
+      sscanf(encoded.substr(i+1, 2).c_str(), "%x", &bytes);
+      ch = static_cast<char>(bytes);
+      res += ch;
+      i = i+2;
+    } else {
+      res += encoded[i];
+    }
+  }
+
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+  std::wstring wstring = conv.from_bytes(res);
+
+  return wstring;
 }
