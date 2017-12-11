@@ -11,8 +11,18 @@ $(document).ready(function() {
 
     $.getJSON(url, function(response) {
       console.log("Got response for query: " + query);
-      $("#results").html(jsonToHtml(response.res));
-      $("#number").html("Found: " + response.found);
+      if ( $("#input").val() != "" ) {
+        $("#qry").html("\"" + esc(query) + "\": ")
+        $("#results").html(jsonToHtml(response.res));
+        $("#number").html("found: " + response.found);
+      }
+      else {
+        console.log("EMPTY");
+        // That means that input field is already empty -> nothing to show
+        $("#results").html("");
+        $("#number").html("");
+        $("#qry").html("");
+      }
     })
   })
 
@@ -24,8 +34,9 @@ $(document).ready(function() {
 function jsonToHtml(entities) {
   var html = "";
   for (var e in entities) {
-    html += "<b>" + esc(entities[e].name) + "</b> - ";
-    html +=  esc(entities[e].description);
+    html += "<b> <a href=\"" + esc(entities[e].wikipediaUrl) + "\">";
+    html += esc(entities[e].name) + "</a></b> - ";
+    html += esc(entities[e].description);
     html += "</br>"
   }
   return html
@@ -33,6 +44,7 @@ function jsonToHtml(entities) {
 
 // Escapes special HTML characters
 function esc(html) {
+  if (html == "") return "";
   return html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
