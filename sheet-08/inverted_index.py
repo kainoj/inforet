@@ -8,7 +8,7 @@ Claudius Korzen <korzen@cs.uni-freiburg.de>
 import math
 import re
 import sys
-
+import scipy.sparse
 
 DEFAULT_B = 0.75
 DEFAULT_K = 1.75
@@ -26,6 +26,10 @@ class InvertedIndex:
         self.inverted_lists = {}  # The inverted lists.
         self.docs = []  # The docs, each in form (title, description).
         self.doc_lengths = []  # The document lengths (= number of words).
+        self.terms = []  # List of all words (unque one) (=inverted_list.first)
+        self.inv_terms = {}  # (term, index in self.term)
+        self.A = []  # Term-dcument matrix
+        self.num_docs = 0  # Number of docs
 
     def read_from_file(self, file_name, b=None, k=None):
         """
@@ -138,6 +142,7 @@ class InvertedIndex:
                 df = len(self.inverted_lists[word])
                 # Compute the BM25 score = tf' * log2(N/df).
                 inverted_list[i] = (doc_id, tf2 * math.log(n / df, 2))
+        self.num_docs = n
 
     def merge(self, list1, list2):
         """
@@ -251,6 +256,81 @@ class InvertedIndex:
 
         print("\n# total hits: %s." % len(postings))
 
+    def preprocessing_vsm(self, l2normalize=False):
+        """
+        Compute the sparse term-document matrix from the inverted list
+        """
+
+        for idx, word in enumerate(self.inverted_lists):
+            self.terms.append(word)
+            self.inv_terms[word] = idx
+
+        # print("term: ")
+        # print(self.terms)
+        # print("inv_term: ")
+        # print(self.inv_terms)
+
+        row = []  # i-th row represents term[i]
+        col = []
+        data = []
+
+        for row_no, term in enumerate(self.terms):
+            # print(term  + " ---> ")
+            # print(self.inverted_lists[term])
+            for col_no, bm25 in self.inverted_lists[term]:
+                row.append(row_no)
+                col.append(col_no - 1)
+                data.append(bm25)
+        self.A = scipy.sparse.csr_matrix((data, (row, col)),
+                                         shape=(len(self.terms),
+                                                self.num_docs))
+
+        # print("\n\n\n\nweirszy: " + str(len(self.terms)) )
+        # print("kolumn: " + str(len(self.docs)))
+        # print("row: ")
+        # print(row)
+        # print("col: ")
+        # print(col)
+        # numpy.set_printoptions(formatter
+        #                        = {"float": lambda x: ("%2.0f" % x)})
+        # print(self.terms)
+        # print("matrix:")
+    def process_query_vsm(self, query, use_refinements=False):
+        """
+        Proces a given query
+
+        >>> ii = InvertedIndex()
+        >>> ii.inverted_lists = {
+        ... "foo": [(1, 0.2), (3, 0.6)],
+        ... "bar": [(1, 0.4), (2, 0.7), (3, 0.5)],
+        ... "baz": [(2, 0.1)]}
+        >>> ii.num_docs = 3
+        >>> ii.preprocessing_vsm()
+        >>> res = ii.process_query_vsm(["foo", "bar"], use_refinements=False)
+        >>> [(id, "%.1f" % tf) for id, tf in res]
+        [(3, '1.1'), (2, '0.7'), (1, '0.6')]
+        """
+
+        # print("term: ")
+        # print(self.terms)
+        # print("inv_term: ")
+        # print(self.inv_terms)
+
+        query_vec = [0] * len(self.terms)
+        for q in query:
+            query_vec[self.inv_terms[q]] += 1
+
+        q = scipy.sparse.csr_matrix(query_vec)
+        q = q.dot(self.A)
+        q = q.toarray()[0]
+        # print("Arr:    ")
+        # # q = q.toarray()[0];
+        # q = q.todense().tolist();
+        # print(q[0])
+        q = [(i+1, j) for i, j in list(enumerate(q))]
+        q.sort(key=lambda x: x[0], reverse=True)
+        # print(q)
+        return q
 
 if __name__ == "__main__":
     # Parse the command line arguments.
@@ -267,7 +347,26 @@ if __name__ == "__main__":
     ii = InvertedIndex()
     ii.read_from_file(file_name, b=b, k=k)
 
-    while True:
+    # ii.preprocessing_vsm()
+    # ii.process_query_vsm(["non", "animated", "non", "animation"],
+    #                      use_refinements=False)
+
+    # print(ii.terms)
+    # print(ii.inverted_lists)
+    #     print("docs: ")
+    # nverted_lists = {}  # The inverted lists.
+    # self.docs = []  # The docs, each in form (title, description).
+    # self.doc_lengths
+    # print("inverted: ")
+    # print(ii.inverted_lists)
+    #
+    # print("\n\ndocs:")
+    # print(ii.docs)
+    #
+    # print("\n\ndocs_len")
+    # print(ii.doc_lengths)
+
+    while False:
         # Ask the user for a keyword query.
         query = input("\nYour keyword query: ")
 
