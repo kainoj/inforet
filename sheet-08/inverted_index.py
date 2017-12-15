@@ -9,6 +9,7 @@ import math
 import re
 import sys
 import scipy.sparse
+import pprint
 
 DEFAULT_B = 0.75
 DEFAULT_K = 1.75
@@ -259,6 +260,18 @@ class InvertedIndex:
     def preprocessing_vsm(self, l2normalize=False):
         """
         Compute the sparse term-document matrix from the inverted list
+        >>> ii = InvertedIndex()
+        >>> ii.read_from_file("example.txt", b=0, k=float("inf"))
+        >>> ii.preprocessing_vsm(l2normalize=False)
+        >>> res = sorted(ii.A.todense().tolist())
+        >>> import pprint
+        >>> pprint.pprint([["%.3f" % x for x in items] for items in res])
+        [['0.000', '0.000', '0.000', '0.000'],
+         ['0.000', '0.000', '1.000', '2.000'],
+         ['0.000', '0.000', '2.000', '0.000'],
+         ['0.000', '1.000', '0.000', '1.000'],
+         ['0.000', '2.000', '0.000', '0.000'],
+         ['0.415', '0.415', '0.000', '0.415']]
         """
 
         for idx, word in enumerate(self.inverted_lists):
@@ -344,10 +357,14 @@ if __name__ == "__main__":
 
     # Create a new inverted index from the given file.
     print("Reading from file '%s'." % file_name)
-    ii = InvertedIndex()
-    ii.read_from_file(file_name, b=b, k=k)
 
-    # ii.preprocessing_vsm()
+    ii = InvertedIndex()
+    ii.read_from_file(file_name, b=0, k=float("inf"))
+    ii.preprocessing_vsm(l2normalize=False)
+    res = sorted(ii.A.todense().tolist())
+    res = [["%.3f" % x for x in items] for items in res]
+    pprint.pprint(res)
+
     # ii.process_query_vsm(["non", "animated", "non", "animation"],
     #                      use_refinements=False)
 
