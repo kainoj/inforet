@@ -290,18 +290,11 @@ class InvertedIndex:
             self.terms.append(word)
             self.inv_terms[word] = idx
 
-        # print("term: ")
-        # print(self.terms)
-        # print("inv_term: ")
-        # print(self.inv_terms)
-
         row = []  # i-th row represents term[i]
         col = []
         data = []
 
         for row_no, term in enumerate(self.terms):
-            # print(term  + " ---> ")
-            # print(self.inverted_lists[term])
             for col_no, bm25 in self.inverted_lists[term]:
                 row.append(row_no)
                 col.append(col_no - 1)
@@ -311,17 +304,21 @@ class InvertedIndex:
                                                 self.num_docs))
         # Matrix normalization
         if l2normalize:
+            print("Normalizing...")
             # AT - A transposed
             AT = self.A.transpose()
             # ATA[i, i] = sum of squares of i-th column
+            print("   ATA...")
             ATA = AT.dot(self.A)
             # Get the diagonal
+            print("   ...done")
             v = [1/sqrt(x) if x > 0 else 0 for x in ATA.diagonal()]
             # If v is a regular vector, than .multiply()
             # will retrun a dense matrix
             v = scipy.sparse.csr_matrix(v)
             # Normalize - point-wise multiplication
             self.A = self.A.multiply(v)
+            print("... done!")
 
     def process_query_vsm(self, query, use_refinements=False):
         """
@@ -359,8 +356,8 @@ class InvertedIndex:
         q = q.dot(self.A)
         q = q.toarray()[0]
         q = [(i+1, j) for i, j in list(enumerate(q))]
-        q.sort(key=lambda x: x[0], reverse=True)
-        return q
+        q = [x for x in q if x[1] != 0]
+        return sorted(q, key=lambda x: x[1], reverse=True)
 
 if __name__ == "__main__":
     # Parse the command line arguments.
@@ -379,7 +376,7 @@ if __name__ == "__main__":
     ii.read_from_file(file_name, b=b, k=k)
     print("... done!")
     print("Preprocessing...")
-    ii.preprocessing_vsm(l2normalize=False)
+    ii.preprocessing_vsm(l2normalize=True)
     print("... done!")
 
     while True:

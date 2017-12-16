@@ -52,6 +52,7 @@ class EvaluateInvertedIndex:
 
         >>> ii = InvertedIndex()
         >>> ii.read_from_file("example.txt", b=0.75, k=1.75)
+        >>> ii.preprocessing_vsm()
         >>> evaluator = EvaluateInvertedIndex()
         >>> benchmark = evaluator.read_benchmark("example-benchmark.txt")
         >>> measures = evaluator.evaluate(ii, benchmark, use_refinements=False,
@@ -71,7 +72,7 @@ class EvaluateInvertedIndex:
 
             # Process the query by the index and fetch only the document ids.
             words = [x.lower().strip() for x in re.split("[^A-Za-z]+", query)]
-            ids = [x[0] for x in ii.process_query(words, use_refinements)]
+            ids = [x[0] for x in ii.process_query_vsm(words, use_refinements)]
 
             # Compute P@3.
             p_at_3 = self.precision_at_k(ids, relevant_ids, 3)
@@ -161,6 +162,7 @@ if __name__ == "__main__":
     print("Creating index with BM25 scores from file '%s'..." % file_name)
     index = InvertedIndex()
     index.read_from_file(file_name, b=b, k=k)
+    index.preprocessing_vsm()
 
     # Read the benchmark.
     print("Reading benchmark from file '%s'..." % benchmark_file_name)
