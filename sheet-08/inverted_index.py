@@ -9,7 +9,6 @@ import math
 import re
 import sys
 import scipy.sparse
-import pprint
 from math import sqrt
 
 DEFAULT_B = 0.75
@@ -338,6 +337,18 @@ class InvertedIndex:
         >>> res = ii.process_query_vsm(["foo", "bar"], use_refinements=False)
         >>> [(id, "%.1f" % tf) for id, tf in res]
         [(3, '1.1'), (2, '0.7'), (1, '0.6')]
+
+        >>> ii2 = InvertedIndex()
+        >>> ii2.inverted_lists = {
+        ... "foo": [(1, 0.2), (3, 0.6)],
+        ... "bar": [(2, 0.4), (3, 0.1), (4, 0.8)]
+        ... }
+        >>> ii2.num_docs = 4
+        >>> ii2.preprocessing_vsm(l2normalize=False)
+        >>> res = ii2.process_query_vsm(["foo", "bar", "foo", "bar"])
+        >>> [(id, "%.1f" % tf) for id, tf in res]
+        [(4, '1.6'), (3, '1.4'), (2, '0.8'), (1, '0.4')]
+
         """
 
         query_vec = [0] * len(self.terms)
@@ -366,9 +377,12 @@ if __name__ == "__main__":
 
     ii = InvertedIndex()
     ii.read_from_file(file_name, b=b, k=k)
-    ii.preprocessing_vsm(l2normalize=True)
+    print("... done!")
+    print("Preprocessing...")
+    ii.preprocessing_vsm(l2normalize=False)
+    print("... done!")
 
-    while False:
+    while True:
         # Ask the user for a keyword query.
         query = input("\nYour keyword query: ")
 
