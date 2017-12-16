@@ -10,6 +10,7 @@ import re
 import sys
 import scipy.sparse
 import pprint
+from math import sqrt
 
 DEFAULT_B = 0.75
 DEFAULT_K = 1.75
@@ -272,6 +273,18 @@ class InvertedIndex:
          ['0.000', '1.000', '0.000', '1.000'],
          ['0.000', '2.000', '0.000', '0.000'],
          ['0.415', '0.415', '0.000', '0.415']]
+
+        # >>> ii.read_from_file("example.txt", b=0.75, k=1.75)
+        # >>> ii.preprocessing_vsm(l2normalize=True)
+        # >>> res = sorted(ii.A.todense().tolist())
+        # >>> import pprint
+        # >>> pprint.pprint([["%.3f" % x for x in items] for items in res])
+        # [['0.000', '0.000', '0.000', '0.000'],
+        #  ['0.000', '0.000', '1.000', '2.000'],
+        #  ['0.000', '0.000', '2.000', '0.000'],
+        #  ['0.000', '1.000', '0.000', '1.000'],
+        #  ['0.000', '2.000', '0.000', '0.000'],
+        #  ['0.415', '0.415', '0.000', '0.415']]
         """
 
         for idx, word in enumerate(self.inverted_lists):
@@ -297,17 +310,20 @@ class InvertedIndex:
         self.A = scipy.sparse.csr_matrix((data, (row, col)),
                                          shape=(len(self.terms),
                                                 self.num_docs))
+        # Matrix normalization
+        if l2normalize:
+            # AT - A transposed
+            AT = self.A.transpose()
+            # ATA[i, i] = sum of squares of i-th column
+            ATA = AT.dot(self.A)
+            # Get the diagonal
+            v = [1/sqrt(x) if x > 0 else 0 for x in ATA.diagonal()]
+            # If v is a regular vector, than .multiply()
+            # will retrun a dense matrix
+            v = scipy.sparse.csr_matrix(v)
+            # Normalize - point-wise multiplication
+            self.A = self.A.multiply(v)
 
-        # print("\n\n\n\nweirszy: " + str(len(self.terms)) )
-        # print("kolumn: " + str(len(self.docs)))
-        # print("row: ")
-        # print(row)
-        # print("col: ")
-        # print(col)
-        # numpy.set_printoptions(formatter
-        #                        = {"float": lambda x: ("%2.0f" % x)})
-        # print(self.terms)
-        # print("matrix:")
     def process_query_vsm(self, query, use_refinements=False):
         """
         Proces a given query
@@ -324,11 +340,6 @@ class InvertedIndex:
         [(3, '1.1'), (2, '0.7'), (1, '0.6')]
         """
 
-        # print("term: ")
-        # print(self.terms)
-        # print("inv_term: ")
-        # print(self.inv_terms)
-
         query_vec = [0] * len(self.terms)
         for q in query:
             query_vec[self.inv_terms[q]] += 1
@@ -336,13 +347,8 @@ class InvertedIndex:
         q = scipy.sparse.csr_matrix(query_vec)
         q = q.dot(self.A)
         q = q.toarray()[0]
-        # print("Arr:    ")
-        # # q = q.toarray()[0];
-        # q = q.todense().tolist();
-        # print(q[0])
         q = [(i+1, j) for i, j in list(enumerate(q))]
         q.sort(key=lambda x: x[0], reverse=True)
-        # print(q)
         return q
 
 if __name__ == "__main__":
@@ -359,29 +365,8 @@ if __name__ == "__main__":
     print("Reading from file '%s'." % file_name)
 
     ii = InvertedIndex()
-    ii.read_from_file(file_name, b=0, k=float("inf"))
-    ii.preprocessing_vsm(l2normalize=False)
-    res = sorted(ii.A.todense().tolist())
-    res = [["%.3f" % x for x in items] for items in res]
-    pprint.pprint(res)
-
-    # ii.process_query_vsm(["non", "animated", "non", "animation"],
-    #                      use_refinements=False)
-
-    # print(ii.terms)
-    # print(ii.inverted_lists)
-    #     print("docs: ")
-    # nverted_lists = {}  # The inverted lists.
-    # self.docs = []  # The docs, each in form (title, description).
-    # self.doc_lengths
-    # print("inverted: ")
-    # print(ii.inverted_lists)
-    #
-    # print("\n\ndocs:")
-    # print(ii.docs)
-    #
-    # print("\n\ndocs_len")
-    # print(ii.doc_lengths)
+    ii.read_from_file(file_name, b=b, k=k)
+    ii.preprocessing_vsm(l2normalize=True)
 
     while False:
         # Ask the user for a keyword query.
