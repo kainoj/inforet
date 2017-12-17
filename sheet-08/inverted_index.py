@@ -8,9 +8,10 @@ Claudius Korzen <korzen@cs.uni-freiburg.de>
 import math
 import re
 import sys
-import scipy.sparse
+
 import numpy
-# from math import sqrt
+
+import scipy.sparse
 
 DEFAULT_B = 0.75
 DEFAULT_K = 1.75
@@ -146,89 +147,6 @@ class InvertedIndex:
                 inverted_list[i] = (doc_id, tf2 * math.log(n / df, 2))
         self.num_docs = n
 
-    def merge(self, list1, list2):
-        """
-        Compute the union of the two given inverted lists in linear time
-        (linear in the total number of entries in the two lists), where the
-        entries in the inverted lists are postings of form (doc_id, bm25_score)
-        and are expected to be sorted by doc_id, in ascending order.
-
-        >>> ii = InvertedIndex()
-        >>> l = ii.merge([(1, 2.1), (5, 3.2)], [(1, 1.7), (2, 1.3), (5, 3.3)])
-        >>> [(id, "%.1f" % tf) for id, tf in l]
-        [(1, '3.8'), (2, '1.3'), (5, '6.5')]
-        """
-        i = 0  # The pointer in the first list.
-        j = 0  # The pointer in the second list.
-        result = []
-
-        # Iterate the lists in an interleaving order and aggregate the scores.
-        while i < len(list1) and j < len(list2):
-            if i < list1[i][0] == list2[j][0]:
-                result.append((list1[i][0], list1[i][1] + list2[j][1]))
-                i += 1
-                j += 1
-            elif list1[i][0] < list2[j][0]:
-                result.append(list1[i])
-                i += 1
-            else:
-                result.append(list2[j])
-                j += 1
-
-        # Append the rest of the first list.
-        while i < len(list1):
-            result.append(list1[i])
-            i += 1
-
-        # Append the rest of the second list.
-        while j < len(list2):
-            result.append(list2[j])
-            j += 1
-
-        return result
-
-    def process_query(self, keywords, use_refinements=False):
-        """
-        Process the given keyword query as follows: Fetch the inverted list for
-        each of the keywords in the query and compute the union of all lists.
-        Sort the resulting list by BM25 scores in descending order.
-
-        If you want to implement some ranking refinements, make these
-        refinements optional (their use should be controllable via the
-        use_refinements flag).
-
-        >>> ii = InvertedIndex()
-        >>> ii.inverted_lists = {
-        ... "foo": [(1, 0.2), (3, 0.6)],
-        ... "bar": [(1, 0.4), (2, 0.7), (3, 0.5)],
-        ... "baz": [(2, 0.1)]}
-        >>> result = ii.process_query(["foo", "bar"], use_refinements=False)
-        >>> [(id, "%.1f" % tf) for id, tf in result]
-        [(3, '1.1'), (2, '0.7'), (1, '0.6')]
-        """
-        if not keywords:
-            return []
-
-        # Fetch the inverted lists for each of the given keywords.
-        lists = []
-        for keyword in keywords:
-            if keyword in self.inverted_lists:
-                lists.append(self.inverted_lists[keyword])
-
-        # Compute the union of all inverted lists.
-        if len(lists) == 0:
-            return []
-
-        union = lists[0]
-        for i in range(1, len(lists)):
-            union = self.merge(union, lists[i])
-
-        # Filter all postings with BM25 = 0.
-        union = [x for x in union if x[1] != 0]
-
-        # Sort the postings by BM25 scores, in descending order.
-        return sorted(union, key=lambda x: x[1], reverse=True)
-
     def render_output(self, postings, keywords, k=3):
         """
         Render the output for the top-k of the given postings. Fetch the
@@ -349,6 +267,7 @@ class InvertedIndex:
         q = [(i+1, j) for i, j in list(enumerate(q))]
         q = [x for x in q if x[1] != 0]
         return sorted(q, key=lambda x: x[1], reverse=True)
+
 
 if __name__ == "__main__":
     # Parse the command line arguments.

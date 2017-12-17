@@ -162,7 +162,7 @@ if __name__ == "__main__":
     print("Creating index with BM25 scores from file '%s'..." % file_name)
     index = InvertedIndex()
     index.read_from_file(file_name, b=b, k=k)
-    index.preprocessing_vsm()
+    index.preprocessing_vsm(l2normalize=False)
 
     # Read the benchmark.
     print("Reading benchmark from file '%s'..." % benchmark_file_name)
