@@ -176,7 +176,7 @@ class InvertedIndex:
 
         print("\n# total hits: %s." % len(postings))
 
-    def preprocessing_vsm(self, l2normalize=False):
+    def preprocessing_vsm(self, l2normalize=False, l1normalize=False):
         """
         Compute the sparse term-document matrix from the inverted list
         >>> ii = InvertedIndex()
@@ -192,17 +192,18 @@ class InvertedIndex:
          ['0.000', '2.000', '0.000', '0.000'],
          ['0.415', '0.415', '0.000', '0.415']]
 
-        # >>> ii.read_from_file("example.txt", b=0.75, k=1.75)
-        # >>> ii.preprocessing_vsm(l2normalize=True)
-        # >>> res = sorted(ii.A.todense().tolist())
-        # >>> import pprint
-        # >>> pprint.pprint([["%.3f" % x for x in items] for items in res])
-        # [['0.000', '0.000', '0.000', '0.000'],
-        #  ['0.000', '0.000', '1.000', '2.000'],
-        #  ['0.000', '0.000', '2.000', '0.000'],
-        #  ['0.000', '1.000', '0.000', '1.000'],
-        #  ['0.000', '2.000', '0.000', '0.000'],
-        #  ['0.415', '0.415', '0.000', '0.415']]
+        >>> ii2 = InvertedIndex()
+        >>> ii2.read_from_file("example.txt", b=0.75, k=1.75)
+        >>> ii2.preprocessing_vsm(l2normalize=True)
+        >>> res = sorted(ii2.A.todense().tolist())
+        >>> import pprint
+        >>> pprint.pprint([["%.3f" % x for x in items] for items in res])
+        [['0.000', '0.000', '0.000', '0.000'],
+         ['0.000', '0.000', '0.447', '0.815'],
+         ['0.000', '0.000', '0.894', '0.000'],
+         ['0.000', '0.440', '0.000', '0.535'],
+         ['0.000', '0.879', '0.000', '0.000'],
+         ['1.000', '0.182', '0.000', '0.222']]
         """
 
         for idx, word in enumerate(self.inverted_lists):
@@ -221,11 +222,22 @@ class InvertedIndex:
         self.A = scipy.sparse.csr_matrix((data, (row, col)),
                                          shape=(len(self.terms),
                                                 self.num_docs))
+
         # Matrix normalization
+        # If more than one normalization specified, the one with lower x
+        # is chosen
+
+        if l1normalize:
+            v = numpy.sqrt(self.A.sum(axis=0))
+            v = scipy.sparse.csr_matrix(v)
+            self.A = self.A.multiply(v)
+            return
+
         if l2normalize:
+            # print("L2 normalize: ")
             v = self.A.multiply(self.A).sum(axis=0)
-            v = numpy.sqrt(v)
-            # Without concersion I get `Memory Error`
+            v = 1.0 / numpy.sqrt(v)
+            # Without conbersion I get `Memory Error`
             v = scipy.sparse.csr_matrix(v)
             self.A = self.A.multiply(v)
 
