@@ -9,7 +9,8 @@ import math
 import re
 import sys
 import scipy.sparse
-from math import sqrt
+import numpy
+# from math import sqrt
 
 DEFAULT_B = 0.75
 DEFAULT_K = 1.75
@@ -304,21 +305,11 @@ class InvertedIndex:
                                                 self.num_docs))
         # Matrix normalization
         if l2normalize:
-            print("Normalizing...")
-            # AT - A transposed
-            AT = self.A.transpose()
-            # ATA[i, i] = sum of squares of i-th column
-            print("   ATA...")
-            ATA = AT.dot(self.A)
-            # Get the diagonal
-            print("   ...done")
-            v = [1/sqrt(x) if x > 0 else 0 for x in ATA.diagonal()]
-            # If v is a regular vector, than .multiply()
-            # will retrun a dense matrix
+            v = self.A.multiply(self.A).sum(axis=0)
+            v = numpy.sqrt(v)
+            # Without concersion I get `Memory Error`
             v = scipy.sparse.csr_matrix(v)
-            # Normalize - point-wise multiplication
             self.A = self.A.multiply(v)
-            print("... done!")
 
     def process_query_vsm(self, query, use_refinements=False):
         """
