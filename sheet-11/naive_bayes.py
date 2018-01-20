@@ -158,26 +158,27 @@ class NaiveBayes(object):
         # Smooth
         self.p_wc = numpy.log(n_c.dot(n_wc + self.EPS))
 
-    # def predict(self, x):
-    #     """
-    #     Predicts a label for each example in the document-term matrix,
-    #     based on the learned probabities stored in this class.
+    def predict(self, x):
+        """
+        Predicts a label for each example in the document-term matrix,
+        based on the learned probabities stored in this class.
 
-    #     Returns a list of predicted label ids.
+        Returns a list of predicted label ids.
 
-    #     >>> wv, cv = generate_vocabularies("example_train.tsv")
-    #     >>> X, y = read_labeled_data("example_train.tsv", cv, wv)
-    #     >>> nb = NaiveBayes()
-    #     >>> nb.train(X, y)
-    #     >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
-    #     >>> nb.predict(X_test)
-    #     array([0, 1, 0])
-    #     >>> nb.predict(X)
-    #     array([0, 0, 1, 0, 1, 1])
-    #     """
+        >>> wv, cv = generate_vocabularies("example_train.tsv")
+        >>> X, y = read_labeled_data("example_train.tsv", cv, wv)
+        >>> nb = NaiveBayes()
+        >>> nb.train(X, y)
+        >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
+        >>> nb.predict(X_test)
+        array([0, 1, 0])
+        >>> nb.predict(X)
+        array([0, 0, 1, 0, 1, 1])
+        """
 
-    #     # TODO: Implement this method.
-    #     return []
+        res = x.dot(self.p_wc.transpose())
+        res = res + self.p_c  # seems like cololumn wise addition
+        return numpy.array([numpy.argmax(row) for row in res])
 
     # def evaluate(self, x, y):
     #     """
