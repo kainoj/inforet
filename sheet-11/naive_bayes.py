@@ -111,6 +111,8 @@ class NaiveBayes(object):
         self.p_c = None
         # The stored probabilities of each word in each class
         self.p_wc = None
+        # Epsilon (smoothing)
+        self.EPS = 0.1
 
     def train(self, x, y):
         """
@@ -136,50 +138,68 @@ class NaiveBayes(object):
         array([0.500, 0.500])
         """
 
-        # TODO: Implement this method.
+        # Calculate p_c
+        unique, counts = numpy.unique(y, return_counts=True)
+        self.p_c = numpy.log(counts / len(y))
 
-    def predict(self, x):
-        """
-        Predicts a label for each example in the document-term matrix,
-        based on the learned probabities stored in this class.
+        # Compute p_wc
+        # Number of different classes
+        c = max(y) + 1
 
-        Returns a list of predicted label ids.
+        # cv[i][j] == 1 iif doc j is in class i
+        cv = numpy.array([[1 if i == j else 0 for j in y]
+                         for i in range(0, c)])
 
-        >>> wv, cv = generate_vocabularies("example_train.tsv")
-        >>> X, y = read_labeled_data("example_train.tsv", cv, wv)
-        >>> nb = NaiveBayes()
-        >>> nb.train(X, y)
-        >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
-        >>> nb.predict(X_test)
-        array([0, 1, 0])
-        >>> nb.predict(X)
-        array([0, 0, 1, 0, 1, 1])
-        """
+        # Number of occurences of word i in documents in T_j (n_wc[i][j])
+        n_wc = cv*x + self.EPS
 
-        # TODO: Implement this method.
-        return []
+        # Inverse nubmer of occurences of all words in document from T_c
+        n_c = numpy.diag(numpy.reciprocal(n_wc.sum(1)))
 
-    def evaluate(self, x, y):
-        """
-        Predicts the labels of X and computes the precisions, recalls and
-        F1 scores for each class.
+        self.p_wc = numpy.log(n_c.dot(n_wc))
 
-        >>> wv, cv = generate_vocabularies("example_train.tsv")
-        >>> X_train, y_train = read_labeled_data("example_train.tsv", cv, wv)
-        >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
-        >>> nb = NaiveBayes()
-        >>> nb.train(X_train, y_train)
-        >>> precisions, recalls, f1_scores = nb.evaluate(X_test, y_test)
-        >>> precisions
-        {0: 0.5, 1: 1.0}
-        >>> recalls
-        {0: 1.0, 1: 0.5}
-        >>> {x: '%.2f' % f1_scores[x] for x in f1_scores}
-        {0: '0.67', 1: '0.67'}
-        """
+    # def predict(self, x):
+    #     """
+    #     Predicts a label for each example in the document-term matrix,
+    #     based on the learned probabities stored in this class.
 
-        # TODO: Implement this method.
-        return {}, {}, {}
+    #     Returns a list of predicted label ids.
+
+    #     >>> wv, cv = generate_vocabularies("example_train.tsv")
+    #     >>> X, y = read_labeled_data("example_train.tsv", cv, wv)
+    #     >>> nb = NaiveBayes()
+    #     >>> nb.train(X, y)
+    #     >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
+    #     >>> nb.predict(X_test)
+    #     array([0, 1, 0])
+    #     >>> nb.predict(X)
+    #     array([0, 0, 1, 0, 1, 1])
+    #     """
+
+    #     # TODO: Implement this method.
+    #     return []
+
+    # def evaluate(self, x, y):
+    #     """
+    #     Predicts the labels of X and computes the precisions, recalls and
+    #     F1 scores for each class.
+
+    #     >>> wv, cv = generate_vocabularies("example_train.tsv")
+    #     >>> X_train, y_train = read_labeled_data("example_train.tsv", cv, wv)
+    #     >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
+    #     >>> nb = NaiveBayes()
+    #     >>> nb.train(X_train, y_train)
+    #     >>> precisions, recalls, f1_scores = nb.evaluate(X_test, y_test)
+    #     >>> precisions
+    #     {0: 0.5, 1: 1.0}
+    #     >>> recalls
+    #     {0: 1.0, 1: 0.5}
+    #     >>> {x: '%.2f' % f1_scores[x] for x in f1_scores}
+    #     {0: '0.67', 1: '0.67'}
+    #     """
+
+    #     # TODO: Implement this method.
+    #     return {}, {}, {}
 
 
 if __name__ == '__main__':
