@@ -143,20 +143,20 @@ class NaiveBayes(object):
         self.p_c = numpy.log(counts / len(y))
 
         # Compute p_wc
-        # Number of different classes
-        c = max(y) + 1
-
         # cv[i][j] == 1 iif doc j is in class i
-        cv = numpy.array([[1 if i == j else 0 for j in y]
-                         for i in range(0, c)])
+        cv = [[1 if i == j else 0 for j in y] for i in range(0, max(y) + 1)]
 
         # Number of occurences of word i in documents in T_j (n_wc[i][j])
-        n_wc = cv*x + self.EPS
+        n_wc = cv*x
+
+        # Number of vocabulary
+        nmbr_v = x.shape[1]
 
         # Inverse nubmer of occurences of all words in document from T_c
-        n_c = numpy.diag(numpy.reciprocal(n_wc.sum(1)))
+        n_c = numpy.diag(numpy.reciprocal(n_wc.sum(1) + self.EPS * nmbr_v))
 
-        self.p_wc = numpy.log(n_c.dot(n_wc))
+        # Smooth
+        self.p_wc = numpy.log(n_c.dot(n_wc + self.EPS))
 
     # def predict(self, x):
     #     """
