@@ -180,27 +180,51 @@ class NaiveBayes(object):
         res = res + self.p_c  # seems like cololumn wise addition
         return numpy.array([numpy.argmax(row) for row in res])
 
-    # def evaluate(self, x, y):
-    #     """
-    #     Predicts the labels of X and computes the precisions, recalls and
-    #     F1 scores for each class.
+    def evaluate(self, x, y):
+        """
+        Predicts the labels of X and computes the precisions, recalls and
+        F1 scores for each class.
 
-    #     >>> wv, cv = generate_vocabularies("example_train.tsv")
-    #     >>> X_train, y_train = read_labeled_data("example_train.tsv", cv, wv)
-    #     >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
-    #     >>> nb = NaiveBayes()
-    #     >>> nb.train(X_train, y_train)
-    #     >>> precisions, recalls, f1_scores = nb.evaluate(X_test, y_test)
-    #     >>> precisions
-    #     {0: 0.5, 1: 1.0}
-    #     >>> recalls
-    #     {0: 1.0, 1: 0.5}
-    #     >>> {x: '%.2f' % f1_scores[x] for x in f1_scores}
-    #     {0: '0.67', 1: '0.67'}
-    #     """
+        >>> wv, cv = generate_vocabularies("example_train.tsv")
+        >>> X_train, y_train = read_labeled_data("example_train.tsv", cv, wv)
+        >>> X_test, y_test = read_labeled_data("example_test.tsv", cv, wv)
+        >>> nb = NaiveBayes()
+        >>> nb.train(X_train, y_train)
+        >>> precisions, recalls, f1_scores = nb.evaluate(X_test, y_test)
+        >>> precisions
+        {0: 0.5, 1: 1.0}
+        >>> recalls
+        {0: 1.0, 1: 0.5}
+        >>> {x: '%.2f' % f1_scores[x] for x in f1_scores}
+        {0: '0.67', 1: '0.67'}
+        """
+        classified = self.predict(x)
 
-    #     # TODO: Implement this method.
-    #     return {}, {}, {}
+        # Number of classes
+        c = numpy.max(y) + 1
+
+        # Number of documents labeled c
+        dc = [(y == i).sum() for i in range(c)]
+
+        # Dꞌc = number of documents classified as c
+        dcprim = [(classified == i).sum() for i in range(c)]
+
+        # Number of document classified AND labeled as c
+        dnd = c * [0]
+        for i in range(0, len(y)):
+            if y[i] == classified[i]:
+                dnd[y[i]] = dnd[y[i]] + 1
+
+        # P ≔ |Dꞌc ∩ Dc| / |Dꞌc|
+        p = {i: x/y for i, (x, y) in zip(range(c), zip(dnd, dcprim))}
+
+        # R ≔ |Dꞌc ∩ Dc| / |Dc|
+        r = {i: x / y for i, (x, y) in zip(range(c), zip(dnd, dc))}
+
+        # F ≔ 2 · P · R / (P + R)
+        f = {i: 2*p[i]*r[i] / (p[i]+r[i]) for i in range(c)}
+
+        return p, r, f
 
 
 if __name__ == '__main__':
