@@ -219,7 +219,7 @@ class NaiveBayes(object):
         p = {i: x/y for i, (x, y) in zip(range(c), zip(dnd, dcprim))}
 
         # R ≔ |Dꞌc ∩ Dc| / |Dc|
-        r = {i: x / y for i, (x, y) in zip(range(c), zip(dnd, dc))}
+        r = {i: x/y for i, (x, y) in zip(range(c), zip(dnd, dc))}
 
         # F ≔ 2 · P · R / (P + R)
         f = {i: 2*p[i]*r[i] / (p[i]+r[i]) for i in range(c)}
@@ -239,13 +239,24 @@ if __name__ == '__main__':
     X_train, y_train = read_labeled_data(train_input, class_vocab, word_vocab)
     X_test, y_test = read_labeled_data(test_input, class_vocab, word_vocab)
 
-    # TODO: Train on the training dataset.
+    nb = NaiveBayes()
 
-    # TODO: Predict labels for the test dataset.
+    # Train on the training dataset.
+    nb.train(X_train, y_train)
 
-    # TODO: Output the precision, recall, and F1 score on the test data, for
-    #       each class separately as well as the (unweighted) average over all
-    #       classes.
+    # Predict labels for the test dataset.
+    predicted = nb.predict(X_test)
+
+    # Output the precision, recall, and F1 score on the test data, for
+    # each class separately as well as the (unweighted) average over all
+    # classes.
+    precisions, recalls, f1_scores = nb.evaluate(X_test, y_test)
+    print("id \t| P \t| R \t| F \t|")
+    for i, val in precisions.items():
+        print("%d \t| %.2f \t| %.2f \t| %.2f \t|" % (i, val,
+                                                     recalls[i], f1_scores[i]))
+
+    print("F-mean = %.2f%%" % (100 * sum(f1_scores.values()) / len(f1_scores)))
 
     # TODO: Print the 30 words with the highest p_wc values per class which do
     #       not appear in the stopwords.txt provided on the Wiki.
