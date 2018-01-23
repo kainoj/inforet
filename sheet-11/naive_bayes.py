@@ -273,7 +273,7 @@ if __name__ == '__main__':
     print("id \t| P \t| R \t| F \t| p_c\t|")
     for i, val in precisions.items():
         print("%d \t| %.2f \t| %.2f \t| %.2f \t| %.2f\t|" %
-              (i, val, recalls[i], f1_scores[i], nb.p_c[i]))
+              (i, val, recalls[i], f1_scores[i], numpy.exp(nb.p_c[i])))
     print("-----------------------------------------")
     print("Avg (%%)\t| %.2f\t| %.2f\t| %.2f\t|\n\n" % (p_mean, r_mean, f_mean))
 
