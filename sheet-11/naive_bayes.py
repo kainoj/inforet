@@ -95,6 +95,19 @@ def read_labeled_data(filename, class_vocab, word_vocab):
     return x, y
 
 
+def read_stopwords(vocab):
+    """
+    Given vocabulary dict, returns set of ids of words in stopwords.txt
+    """
+    stop = set()
+    with open("stopwords.txt", "r") as f:
+        for i, line in enumerate(f):
+            line = line.replace('\n', '')
+            if line in vocab:
+                stop.add(vocab[line])
+    return stop
+
+
 class NaiveBayes(object):
     """
     A simple naive bayes classifier as explained in the lecture.
@@ -251,12 +264,29 @@ if __name__ == '__main__':
     # each class separately as well as the (unweighted) average over all
     # classes.
     precisions, recalls, f1_scores = nb.evaluate(X_test, y_test)
-    print("id \t| P \t| R \t| F \t|")
+
+    # Means of P, R, F
+    p_mean = 100 * sum(precisions.values()) / len(precisions)
+    r_mean = 100 * sum(recalls.values()) / len(recalls)
+    f_mean = 100 * sum(f1_scores.values()) / len(f1_scores)
+
+    print("id \t| P \t| R \t| F \t| p_c\t|")
     for i, val in precisions.items():
-        print("%d \t| %.2f \t| %.2f \t| %.2f \t|" % (i, val,
-                                                     recalls[i], f1_scores[i]))
+        print("%d \t| %.2f \t| %.2f \t| %.2f \t| %.2f\t|" %
+              (i, val, recalls[i], f1_scores[i], nb.p_c[i]))
+    print("-----------------------------------------")
+    print("Avg (%%)\t| %.2f\t| %.2f\t| %.2f\t|\n\n" % (p_mean, r_mean, f_mean))
 
-    print("F-mean = %.2f%%" % (100 * sum(f1_scores.values()) / len(f1_scores)))
+    # Print the 20 words with the highest p_wc values per class which do
+    # not appear in the stopwords.txt provided on the Wiki.
 
-    # TODO: Print the 30 words with the highest p_wc values per class which do
-    #       not appear in the stopwords.txt provided on the Wiki.
+    word_keys = list(word_vocab.keys())
+    word_vals = list(word_vocab.values())
+
+    # Set of id of stopwords
+    stops = read_stopwords(word_vocab)
+
+    for c, i in class_vocab.items():
+        print("\n\nClass: {} (id = {})".format(c, i))
+        words = [x for x in nb.p_wc[i, ].argsort() if x not in stops][:20]
+        print([word_keys[word_vals.index(i)] for i in words])
