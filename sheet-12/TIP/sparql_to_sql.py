@@ -28,25 +28,14 @@ class SPARQL:
         Translates the given SPARQL query to a corresponding SQL query.
 
         TODO: Implement test case(s).
-        # >>> sts = SPARQL()
-        # >>> sts.sparql_to_sql("SELECT ?f ?p WHERE {" \
-        # "?f \\"instance of\\" \\"film\\" ." \
-        # "?f \\"award received\\" \\"Academy Award for Best Picture\\" ." \
-        # "?f \\"director\\" ?p ." \
-        # "?p \\"country of citizenship\\" \\"Germany\\"}")
         >>> sts = SPARQL()
-        ... # doctest: +NORMALIZE_WHITESPACE
-        >>> sts.sparql_to_sql("SELECT ?p1 ?p2 ?f WHERE {" \
-                "?p1 \\"acted_in\\" ?f ." \
-                "?p2 \\"acted_in\\" ?f ." \
-                "?p1 \\"married_to\\" ?p2 }")
-        'SELECT p1, p2, f \
-FROM wikidata as f0, \
-wikidata as f1, \
-wikidata as f2 \
-WHERE f0.object = f1.object \
-AND f0.subject = f2.subject \
-AND f1.subject = f2.object'
+        >>> ans = sts.sparql_to_sql("SELECT ?f ?p WHERE {" \
+        "?f \\"instancefa of\\" \\"film\\" ." \
+        "?f \\"award received\\" \\"Academy Award for Best Picture\\" ." \
+        "?f \\"director\\" ?p ." \
+        "?p \\"country of citizenship\\" \\"Germany\\"}")
+        >>> ans == sts.sparql_to_sql_test()
+        True
         """
         # Transform all letters to lower cases.
         sparqll = sparql.lower()
@@ -75,41 +64,57 @@ AND f1.subject = f2.object'
 
         # TODO: Compose the SQL query and return it.
 
-        # Compose SELECT clause
-        select_clause = "SELECT "
-        for v in variables:
-            select_clause += v[1:] + ", "
-        # Remove last comma
-        select_clause = select_clause[:-2]
-
         # Compose FROM clause and generate variable occurences map
         from_clause = "FROM "
         var_occurrences = {key: [] for key in variables}
+
+        # Occurrences of subject/predicat/object with given value
+        val_occ = ""
 
         for i, (subj, pred, obj) in enumerate(triples):
             # Expand "FROM" clause
             from_clause += "wikidata as f" + str(i) + ", "
 
             # I asasume that only variables start with '?'
-            if subj in var_occurrences:
-                var_occurrences[subj].append("f" + str(i) + ".subject")
-
             if obj in var_occurrences:
                 var_occurrences[obj].append("f" + str(i) + ".object")
+            else:
+                val_occ += "f" + str(i) + ".obj=\"" + obj + "\"\nAND "
+
+            # Predicate also can be a variable...
+            if pred in var_occurrences:
+                var_occurrences[pred].append("f" + str(i) + ".predicate")
+            else:
+                val_occ += "f" + str(i) + ".predicate=\"" + pred + "\"\nAND "
+
+            if subj in var_occurrences:
+                var_occurrences[subj].append("f" + str(i) + ".subject")
+            else:
+                val_occ += "f" + str(i) + ".subject=\"" + subj + "\"\nAND "
 
         # Remove last comma from from_clause:
         from_clause = from_clause[:-2]
 
         # Compose WHERE clause
-        where_clause = "WHERE "
+        where_clause = "WHERE\n"
 
         # sorted() in needed only for test coherency
         for key, val in sorted(var_occurrences.items()):
             for i in range(1, len(val)):
-                where_clause += val[i-1] + " = " + val[i] + " AND "
-        where_clause = where_clause[:-5]
+                where_clause += val[i-1] + " = " + val[i] + "\nAND "
+        where_clause = where_clause + val_occ[:-5]
 
-        return select_clause + ' ' + from_clause + ' ' + where_clause
+        # Compose SELECT clause
+        select_clause = "SELECT "
+        for v in variables:
+            select_clause += var_occurrences[v][0] + ", "
+
+        # Remove last comma
+        select_clause = select_clause[:-2]
+
+        ans = select_clause + '\n' + from_clause + '\n' + where_clause + ";"
+        # print(ans)
+        return ans
 
     def process_sql_query(self, db_name, sql):
         """
@@ -120,6 +125,22 @@ AND f1.subject = f2.object'
         """
         # TODO: Run the SQL query against the database and return the result.
         return None
+
+    def sparql_to_sql_test(self):
+        ans = """SELECT f0.subject, f2.object
+FROM wikidata as f0, wikidata as f1, wikidata as f2, wikidata as f3
+WHERE
+f0.subject = f1.subject
+AND f1.subject = f2.subject
+AND f2.object = f3.subject
+AND f0.obj="film"
+AND f0.predicate="instance of"
+AND f1.obj="Academy Award for Best Picture"
+AND f1.predicate="award received"
+AND f2.predicate="director"
+AND f3.obj="Germany"
+AND f3.predicate="country of citizenship";"""
+        return ans
 
 
 if __name__ == '__main__':
