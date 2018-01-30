@@ -1,0 +1,1 @@
+SELECT ?f ?p WHERE { ?f "instance of" "film" . ?f "award received" "Academy Award for Best Picture" . ?f "director" ?p . ?p "country of citizenship" "Germany" }

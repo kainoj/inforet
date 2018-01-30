@@ -153,9 +153,13 @@ AND f3.predicate="country of citizenship";"""
 
 
 if __name__ == '__main__':
-    # TODO: Read the path to the SQLite3 database from the command line.
+    # Parse the command line arguments.
+    if len(sys.argv) < 2:
+        print("Usage: python3 sparql_to_sql.py <database.db>")
+        sys.exit()
 
-    engine = SPARQL()
+    db_name = sys.argv[1]
+    engine  = SPARQL()
 
     while (True):
         # Read the SPARQL query to process from the command line.
@@ -164,9 +168,10 @@ if __name__ == '__main__':
         # Translate the SPARQL query to an SQL query.
         try:
             sql = engine.sparql_to_sql(sparql)
+            res = engine.process_sql_query(db_name, sql)
+            for row in res:
+                print("\t\t".join(row))
         except Exception:
             print("Syntax error...")
             sys.exit(1)
-
-        # TODO: Run the SQL query against the database.
-        # TODO: Output the result rows.
+            
