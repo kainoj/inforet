@@ -60,9 +60,8 @@ class SPARQL:
 
         # Find the (optional) LIMIT clause.
         limit_start = sparqll.find(" limit ", where_end)
-        limit = sparql[limit_start + 7:].strip() if limit_start > 0 else None
-
-        # TODO: Compose the SQL query and return it.
+        limit = "LIMIT " + sparql[limit_start + 7:].strip() \
+                if limit_start > 0 else ""
 
         # Compose FROM clause and generate variable occurences map
         from_clause = "FROM "
@@ -112,8 +111,9 @@ class SPARQL:
         # Remove last comma
         select_clause = select_clause[:-2]
 
-        res = select_clause + '\n' + from_clause + '\n' + where_clause + ";"
-        return res
+        res = select_clause + '\n' + from_clause + '\n'
+        res += where_clause + '\n' + limit
+        return res + ";"
 
     def process_sql_query(self, db_name, sql):
         """
@@ -148,7 +148,8 @@ AND f1.object="Academy Award for Best Picture"
 AND f1.predicate="award received"
 AND f2.predicate="director"
 AND f3.object="Germany"
-AND f3.predicate="country of citizenship";"""
+AND f3.predicate="country of citizenship"
+;"""
         return ans
 
 
@@ -159,7 +160,7 @@ if __name__ == '__main__':
         sys.exit()
 
     db_name = sys.argv[1]
-    engine  = SPARQL()
+    engine = SPARQL()
 
     while (True):
         # Read the SPARQL query to process from the command line.
@@ -174,4 +175,3 @@ if __name__ == '__main__':
         except Exception:
             print("Syntax error...")
             sys.exit(1)
-            
