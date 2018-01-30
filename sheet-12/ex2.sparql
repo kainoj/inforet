@@ -1,0 +1,1 @@
+SELECT ?p ?u WHERE { ?p "country of citizenship" "Germany" . ?p "occupation" "computer scientist" . ?p "sex or gender" "female" . ?p "educated at" ?u  }

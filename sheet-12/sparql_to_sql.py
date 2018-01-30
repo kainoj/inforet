@@ -172,6 +172,7 @@ if __name__ == '__main__':
             res = engine.process_sql_query(db_name, sql)
             for row in res:
                 print("\t\t".join(row))
+            print(str(len(res)) + " triplets in total")
         except Exception:
             print("Syntax error...")
             sys.exit(1)

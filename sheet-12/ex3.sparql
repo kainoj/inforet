@@ -1,0 +1,1 @@
+SELECT ?g WHERE { ?g "instance of" "video game" . ?g "platform" "PlayStation 4" } LIMIT 10
