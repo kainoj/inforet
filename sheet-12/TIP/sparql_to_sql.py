@@ -7,8 +7,8 @@ Authors: Patrick Brosi <brosi@cs.uni-freiburg.de>,
 
 import re
 import readline  # NOQA
-import sys
 import sqlite3
+import sys
 
 
 class SPARQL:
@@ -79,7 +79,7 @@ class SPARQL:
             if obj in var_occurrences:
                 var_occurrences[obj].append("f" + str(i) + ".object")
             else:
-                val_occ += "f" + str(i) + ".obj=\"" + obj + "\"\nAND "
+                val_occ += "f" + str(i) + ".object=\"" + obj + "\"\nAND "
 
             # Predicate also can be a variable...
             if pred in var_occurrences:
@@ -101,7 +101,7 @@ class SPARQL:
         # sorted() in needed only for test coherency
         for key, val in sorted(var_occurrences.items()):
             for i in range(1, len(val)):
-                where_clause += val[i-1] + " = " + val[i] + "\nAND "
+                where_clause += val[i-1] + "=" + val[i] + "\nAND "
         where_clause = where_clause + val_occ[:-5]
 
         # Compose SELECT clause
@@ -113,11 +113,6 @@ class SPARQL:
         select_clause = select_clause[:-2]
 
         res = select_clause + '\n' + from_clause + '\n' + where_clause + ";"
-
-        # print("RES")
-        # print(">"+res+"<")
-        # print("ANS")
-        # print(">"+self.sparql_to_sql_test()+"<")
         return res
 
     def process_sql_query(self, db_name, sql):
@@ -132,24 +127,27 @@ class SPARQL:
         "?f \\"director\\" ?p ." \
         "?p \\"country of citizenship\\" \\"Germany\\"}")
         >>> sts.process_sql_query("example.db", ans)
-        [("The Life of Emile Zola", "William Dieterle")]
+        [('The Life of Emile Zola', 'William Dieterle')]
         """
         # TODO: Run the SQL query against the database and return the result.
-        return None
+        db = sqlite3.connect("example.db")
+        cursor = db.cursor()
+        cursor.execute(sql)
+        return cursor.fetchall()
 
     def sparql_to_sql_test(self):
         ans = """SELECT f0.subject, f2.object
 FROM wikidata as f0, wikidata as f1, wikidata as f2, wikidata as f3
 WHERE
-f0.subject = f1.subject
-AND f1.subject = f2.subject
-AND f2.object = f3.subject
-AND f0.obj="film"
+f0.subject=f1.subject
+AND f1.subject=f2.subject
+AND f2.object=f3.subject
+AND f0.object="film"
 AND f0.predicate="instance of"
-AND f1.obj="Academy Award for Best Picture"
+AND f1.object="Academy Award for Best Picture"
 AND f1.predicate="award received"
 AND f2.predicate="director"
-AND f3.obj="Germany"
+AND f3.object="Germany"
 AND f3.predicate="country of citizenship";"""
         return ans
 
