@@ -8,6 +8,7 @@ Authors: Patrick Brosi <brosi@cs.uni-freiburg.de>,
 import re
 import readline  # NOQA
 import sys
+import sqlite3
 
 
 class SPARQL:
@@ -27,10 +28,9 @@ class SPARQL:
         """
         Translates the given SPARQL query to a corresponding SQL query.
 
-        TODO: Implement test case(s).
         >>> sts = SPARQL()
         >>> ans = sts.sparql_to_sql("SELECT ?f ?p WHERE {" \
-        "?f \\"instancefa of\\" \\"film\\" ." \
+        "?f \\"instance of\\" \\"film\\" ." \
         "?f \\"award received\\" \\"Academy Award for Best Picture\\" ." \
         "?f \\"director\\" ?p ." \
         "?p \\"country of citizenship\\" \\"Germany\\"}")
@@ -112,16 +112,27 @@ class SPARQL:
         # Remove last comma
         select_clause = select_clause[:-2]
 
-        ans = select_clause + '\n' + from_clause + '\n' + where_clause + ";"
-        # print(ans)
-        return ans
+        res = select_clause + '\n' + from_clause + '\n' + where_clause + ";"
+
+        # print("RES")
+        # print(">"+res+"<")
+        # print("ANS")
+        # print(">"+self.sparql_to_sql_test()+"<")
+        return res
 
     def process_sql_query(self, db_name, sql):
         """
         Runs the given SQL query against the given instance of a SQLite3
         database and returns the result rows.
 
-        TODO: Implement test case(s).
+        >>> sts = SPARQL()
+        >>> ans = sts.sparql_to_sql("SELECT ?f ?p WHERE {" \
+        "?f \\"instance of\\" \\"film\\" ." \
+        "?f \\"award received\\" \\"Academy Award for Best Picture\\" ." \
+        "?f \\"director\\" ?p ." \
+        "?p \\"country of citizenship\\" \\"Germany\\"}")
+        >>> sts.process_sql_query("example.db", ans)
+        [("The Life of Emile Zola", "William Dieterle")]
         """
         # TODO: Run the SQL query against the database and return the result.
         return None
