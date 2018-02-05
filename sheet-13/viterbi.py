@@ -5,32 +5,42 @@
 
 # A simple Named Entity Recognition engine using the Viterbi algorithm.
 class NamedEntityRecognition:
-    """
-    Computes the sequence of POS-tags for the given sentence using the Viterbi
-    algorithm, as explained in the lecture.
 
-    The sentence is given as an array of words, without punctuation
-    (e.g., commas or full stops).
+    def __init__(self):
+        # Transition probabilities :: Map<String, Map<String, float>>
+        self.trans_probs = {}
 
-    The transition probabilities and the word distribution for each tag are
-    given in two files on the Wiki. For example code to read these files, see
-    the methods given below. Note that there are two special POS-tags for the
-    beginning and the end of a sentence.
+        # Word distribution :: Map<String, Map<String, float>>
+        self.word_distribution = {}
 
-    Returns a list of tuples (word, POS-tag) that defines the POS-tag for each
-    word in the given sentence.
+    def pos_tag(self, sentence):
+        """
+        Computes the sequence of POS-tags for the given sentence using
+        the Viterbi algorithm, as explained in the lecture.
 
-    TEST CASE:
-        ner = NamedEntityRecognition()
-        ner.read_trans_probs_from_file("example-trans-probs.tsv")
-        ner.read_word_distribution_from_file("example-word-distrib.tsv")
-        ner.pos_tag(["James", "Bond", "is", "an", "agent"])
+        The sentence is given as an array of words, without punctuation
+        (e.g., commas or full stops).
 
-    RESULT:
+        The transition probabilities and the word distribution for each tag are
+        given in two files on the Wiki. For example code to read these files,
+        see the methods given below. Note that there are two special POS-tags
+        for the beginning and the end of a sentence.
+
+        Returns a list of tuples (word, POS-tag) that defines the POS-tag
+        for each word in the given sentence.
+
+        >>> ner = NamedEntityRecognition()
+        >>> ner.read_trans_probs_from_file("example-trans-probs.tsv")
+        >>> ner.read_word_distrib_from_file("example-word-distrib.tsv")
+        >>> ner.pos_tag(["James", "Bond", "is", "an", "agent"])
         [("James", "NNP"), ("Bond", "NNP"), ("is", "VB"),
           ("an", "OTHER"), ("agent", "NN")]
-    List<Tuple<String, String>> pos_tag(List<String> sentence)
+        """
 
+        # List<Tuple<String, String>> pos_tag(List<String> sentence)
+        return []
+
+    """
     Recognizes entities in the given sentence.
 
     As explained in the lecture, you can simply POS-tag the sentence using the
@@ -42,7 +52,7 @@ class NamedEntityRecognition:
     TEST CASE:
         ner = NamedEntityRecognition()
         ner.read_trans_probs_from_file("example-trans-probs.tsv")
-        ner.read_word_distribution_from_file("example-word-distrib.tsv")
+        ner.read_word_distrib_from_file("example-word-distrib.tsv")
         ner.find_named_entities(["James", "Bond", "is", "an", "agent"])
 
     RESULT:
@@ -65,23 +75,19 @@ class NamedEntityRecognition:
         ... 'OTHER': { 'NNP': 0.1, 'NN': 0.5, 'OTHER': 0.4 }
         ... }
         >>> ner = NamedEntityRecognition()
-        >>> res = ner.read_trans_probs_from_file("example-trans-probs.tsv")
-        >>> ans == res
+        >>> ner.read_trans_probs_from_file("example-trans-probs.tsv")
+        >>> ans == ner.trans_probs
         True
         """
-        trans_probs = {}
         with open(filename) as f:
             for line in f:
                 tag1, tag2, probability = line.strip().split("\t")
 
-                if tag1 not in trans_probs:
-                    trans_probs[tag1] = {}
-                trans_probs[tag1][tag2] = float(probability)
+                if tag1 not in self.trans_probs:
+                    self.trans_probs[tag1] = {}
+                self.trans_probs[tag1][tag2] = float(probability)
 
-        #  Map<String, Map<String, float>>
-        return trans_probs
-
-    def read_word_distribution_from_file(self, filename):
+    def read_word_distrib_from_file(self, filename):
         """
         Reads the word distribution from the given file.
 
@@ -93,18 +99,24 @@ class NamedEntityRecognition:
         ...    'VB':    { 'is': 0.8, 'Bond': 0.2 },
         ...    'OTHER': { 'James': 0.2, 'Bond': 0.2, 'an': 0.6 }
         ... }
-        >>> nr = NamedEntityRecognition()
-        >>> r = nr.read_word_distribution_from_file("example-word-distrib.tsv")
-        >>> ans == r
+        >>> ner = NamedEntityRecognition()
+        >>> ner.read_word_distrib_from_file("example-word-distrib.tsv")
+        >>> ans == ner.word_distribution
         True
         """
-        word_distribution = {}
+
         with open(filename) as f:
             for line in f:
                 word, tag, probability = line.strip().split("\t")
 
-                if tag not in word_distribution:
-                    word_distribution[tag] = {}
-                word_distribution[tag][word] = float(probability)
-        #  Map<String, Map<String, float>>
-        return word_distribution
+                if tag not in self.word_distribution:
+                    self.word_distribution[tag] = {}
+                self.word_distribution[tag][word] = float(probability)
+
+
+if __name__ == '__main__':
+    # Parse the command line arguments.
+    # if len(sys.argv) < 2:
+    #     print("Usage: python3 sparql_to_sql.py <database.db>")
+    #     sys.exit()
+    print("TODO: main")
