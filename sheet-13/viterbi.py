@@ -42,11 +42,6 @@ class NamedEntityRecognition:
         [('James', 'NNP'), ('Bond', 'NNP'), ('is', 'VB'),
          ('an', 'OTHER'), ('agent', 'NN')]
         """
-        # print("transition probabilities:")
-        # print(self.trans_probs)
-        # print("word distribution")
-        # print(self.word_dist)
-
         # TODO(I): is sorting really needed?
         # tag_arr :: tag number (in matrix 'p') → tag name
         tag_arr = sorted(list(self.word_dist))
@@ -185,6 +180,26 @@ class NamedEntityRecognition:
 if __name__ == '__main__':
     # Parse the command line arguments.
     if len(sys.argv) < 3:
-        print("Usage: python3 viterbi.py <TODO> <TODO>")
+        print("Usage: python3 viterbi.py" +
+              "<word-distribution.tsv> <transition-probabilities>")
         sys.exit()
-    print("TODO: main")
+
+    word_dist_filename = sys.argv[1]
+    trans_probs_filename = sys.argv[2]
+
+    ner = NamedEntityRecognition()
+    ner.read_trans_probs_from_file(trans_probs_filename)
+    ner.read_word_distrib_from_file(word_dist_filename)
+
+    while (True):
+        # Read the sentence to process from the command line.
+        sentence = input("Enter sentence: ")
+        sentence = sentence.split(' ')
+        tagged = ner.pos_tag(sentence)
+        print("Result: ")
+        for s, t in tagged:
+            print("\t{}\t{}".format(s, t))
+        print("\nNamed Entities:")
+        named = ner.find_named_entities(sentence)
+        print('\t' + '\n\t'.join(named))
+        print()
