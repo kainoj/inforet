@@ -2,6 +2,8 @@
 #  Chair of Algorithms and Data Structures.
 #  Author: Claudius Korzen <korzen@cs.uni-freiburg.de>.
 
+import sys
+
 import numpy as np
 
 
@@ -89,25 +91,43 @@ class NamedEntityRecognition:
         # List<Tuple<String, String>> pos_tag(List<String> sentence
         return list(zip(sentence, tags))
 
-    """
-    Recognizes entities in the given sentence.
+    def find_named_entities(self, sentence):
+        """
+        Recognizes entities in the given sentence.
 
-    As explained in the lecture, you can simply POS-tag the sentence using the
-    method pos_tag() above and take each maximal sequence of words tagged with
-    "NNP" as a named entity.
+        As explained in the lecture, you can simply POS-tag the sentence using
+        the method pos_tag() above and take each maximal sequence of words
+        tagged with "NNP" as a named entity.
 
-    Returns a list of strings that represent the recognized entities.
+        Returns a list of strings that represent the recognized entities.
 
-    TEST CASE:
-        ner = NamedEntityRecognition()
-        ner.read_trans_probs_from_file("example-trans-probs.tsv")
-        ner.read_word_distrib_from_file("example-word-distrib.tsv")
-        ner.find_named_entities(["James", "Bond", "is", "an", "agent"])
+        TEST CASE:
+        >>> ner = NamedEntityRecognition()
+        >>> ner.read_trans_probs_from_file("example-trans-probs.tsv")
+        >>> ner.read_word_distrib_from_file("example-word-distrib.tsv")
+        >>> ner.find_named_entities(["James", "Bond", "is", "an", "agent"])
+        ['James Bond']
+        """
+        _, tags = zip(*self.pos_tag(sentence))
+        tags = list(tags)
 
-    RESULT:
-        ["James Bond"]
-    List<String> find_named_entities(List<String> sentence)
-    """
+        # Handle "NNP" at the very end
+        tags.append("FAKETAG")
+        ans = []
+
+        # s - stat of "NNP" sequence
+        s = 0
+        in_seq = False
+        for i in range(0, len(tags)):
+            if tags[i] == "NNP":
+                if not in_seq:
+                    s = i
+                    in_seq = True
+            else:
+                if in_seq:
+                    ans.append(' '.join(sentence[s: i]))
+                in_seq = False
+        return ans
 
     def read_trans_probs_from_file(self, filename):
         """
@@ -164,7 +184,7 @@ class NamedEntityRecognition:
 
 if __name__ == '__main__':
     # Parse the command line arguments.
-    # if len(sys.argv) < 2:
-    #     print("Usage: python3 sparql_to_sql.py <database.db>")
-    #     sys.exit()
+    if len(sys.argv) < 3:
+        print("Usage: python3 viterbi.py <TODO> <TODO>")
+        sys.exit()
     print("TODO: main")
