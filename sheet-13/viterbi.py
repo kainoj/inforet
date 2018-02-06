@@ -2,16 +2,19 @@
 #  Chair of Algorithms and Data Structures.
 #  Author: Claudius Korzen <korzen@cs.uni-freiburg.de>.
 
+import numpy as np
 
-# A simple Named Entity Recognition engine using the Viterbi algorithm.
+
 class NamedEntityRecognition:
-
+    """
+    A simple Named Entity Recognition engine using the Viterbi algorithm.
+    """
     def __init__(self):
         # Transition probabilities :: Map<String, Map<String, float>>
         self.trans_probs = {}
 
         # Word distribution :: Map<String, Map<String, float>>
-        self.word_distribution = {}
+        self.word_dist = {}
 
     def pos_tag(self, sentence):
         """
@@ -33,12 +36,58 @@ class NamedEntityRecognition:
         >>> ner.read_trans_probs_from_file("example-trans-probs.tsv")
         >>> ner.read_word_distrib_from_file("example-word-distrib.tsv")
         >>> ner.pos_tag(["James", "Bond", "is", "an", "agent"])
-        [("James", "NNP"), ("Bond", "NNP"), ("is", "VB"),
-          ("an", "OTHER"), ("agent", "NN")]
+        ... # doctest: +NORMALIZE_WHITESPACE
+        [('James', 'NNP'), ('Bond', 'NNP'), ('is', 'VB'),
+         ('an', 'OTHER'), ('agent', 'NN')]
         """
+        # print("transition probabilities:")
+        # print(self.trans_probs)
+        # print("word distribution")
+        # print(self.word_dist)
 
-        # List<Tuple<String, String>> pos_tag(List<String> sentence)
-        return []
+        # TODO(I): is sorting really needed?
+        # tag_arr :: tag number (in matrix 'p') → tag name
+        tag_arr = sorted(list(self.word_dist))
+
+        n = len(tag_arr)
+        m = len(sentence)
+        p = np.zeros((n, m))
+
+        tags = []
+
+        # Initiation
+        word = sentence[0]
+        for i in range(0, n):
+            tag = tag_arr[i]
+            if tag in self.trans_probs["BEG"] and word in self.word_dist[tag]:
+                p[i][0] = self.trans_probs["BEG"][tag] * \
+                            self.word_dist[tag][word]
+            else:
+                # TODO(i): smooth
+                p[i][0] = 0
+        tags.append(tag_arr[np.argmax(p[:, 0])])
+
+        # Algorithm
+        # Iterate through words in sentene
+        for j in range(1, m):
+            word = sentence[j]
+            # Interate through current tags
+            for i in range(0, n):
+                tag = tag_arr[i]
+                # Previous probabs - I'll find max over'em
+                prev = [0] * n
+                # Iterate through previous tags
+                for t in range(0, n):
+                    if tag in self.trans_probs[tag_arr[t]]:
+                        prev[t] = p[t][j-1] * self.trans_probs[tag_arr[t]][tag]
+                if word in self.word_dist[tag]:
+                    p[i][j] = max(prev) * self.word_dist[tag][word]
+
+            tags.append(tag_arr[np.argmax(p[:, j])])
+
+        # todo smoothibg
+        # List<Tuple<String, String>> pos_tag(List<String> sentence
+        return list(zip(sentence, tags))
 
     """
     Recognizes entities in the given sentence.
@@ -101,17 +150,16 @@ class NamedEntityRecognition:
         ... }
         >>> ner = NamedEntityRecognition()
         >>> ner.read_word_distrib_from_file("example-word-distrib.tsv")
-        >>> ans == ner.word_distribution
+        >>> ans == ner.word_dist
         True
         """
-
         with open(filename) as f:
             for line in f:
                 word, tag, probability = line.strip().split("\t")
 
-                if tag not in self.word_distribution:
-                    self.word_distribution[tag] = {}
-                self.word_distribution[tag][word] = float(probability)
+                if tag not in self.word_dist:
+                    self.word_dist[tag] = {}
+                self.word_dist[tag][word] = float(probability)
 
 
 if __name__ == '__main__':
